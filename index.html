@@ -117,7 +117,7 @@ body.home main{padding:0;max-width:none;margin:0}
 #sheet .sh{display:inline-block;vertical-align:-4px;width:18px;height:18px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#06205e;color:#fff;padding:11px 18px;border-radius:24px;font-size:14px;z-index:60;display:none;max-width:88vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.35)}
 /* ---- Milo the guide */
-#milo{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom) + 72px);width:54px;height:58px;z-index:20;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 5px 7px rgba(0,0,0,.38)) drop-shadow(0 0 9px rgba(255,196,120,.28));animation:gin .7s both 1.6s}
+#milo{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom) + 72px);width:54px;height:58px;z-index:20;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 5px 7px rgba(0,0,0,.38)) drop-shadow(0 0 9px rgba(255,196,120,.28));animation:gin .7s backwards 1.6s;touch-action:manipulation}
 body.home #milo{bottom:calc(env(safe-area-inset-bottom) + 10px);width:64px;height:68px}
 #milo:focus-visible{outline:3px solid #7fd8ff;outline-offset:3px;border-radius:50%}
 .milo-art{display:block;width:100%;height:100%}
@@ -132,7 +132,7 @@ body.home #milo{bottom:calc(env(safe-area-inset-bottom) + 10px);width:64px;heigh
 .blink .m-blink{transform:scaleY(.07)}
 .sleepy .m-blink{transform:scaleY(.36)}
 .sleepy.blink .m-blink{transform:scaleY(.07)}
-.m-happy,.m-mouth-h,.m-mouth-s,.m-cos,.m-z,.m-poof{display:none}
+.m-happy,.m-mouth-h,.m-mouth-s,.m-mouth-y,.m-arm,.m-cos,.m-z,.m-poof{display:none}
 .happy .m-eyes,.happy .m-mouth{display:none}.happy .m-happy,.happy .m-mouth-h{display:inline}
 .sleepy:not(.happy) .m-mouth{display:none}.sleepy:not(.happy) .m-mouth-s{display:inline}.sleepy:not(.happy) .m-z{display:inline}
 .cos-snorkel .m-c-snorkel{display:inline}.cos-spa .m-c-spa{display:inline}.cos-chef .m-c-chef{display:inline}.cos-party .m-c-party{display:inline}.cos-wedding .m-c-wedding{display:inline}.cos-reef .m-c-reef{display:inline}.cos-magnifier .m-c-magnifier{display:inline}.cos-explorer .m-c-explorer{display:inline}.cos-night .m-c-night{display:inline}
@@ -182,6 +182,14 @@ body:not(.home) #mbub{bottom:calc(env(safe-area-inset-bottom) + 84px);right:68px
 #mchat .ft button{background:none;border:0;color:#0b3a7a;text-decoration:underline;cursor:pointer;font-size:12px}
 body.mchat-on #milo,body.mchat-on #mbub{visibility:hidden}
 #sheet.on~#milo,#sheet.on~#mbub,#sheet.on~#mchat{display:none}
+
+.wave .m-arm{display:inline}.m-tk{display:block;width:100%;height:100%;transform-origin:50% 90%}
+.talk .m-tk{animation:mtalk .44s ease-in-out infinite alternate}@keyframes mtalk{from{transform:rotate(-3deg) translateY(0)}to{transform:rotate(3deg) translateY(-2px)}}
+.talk .m-mouth{transform-box:fill-box;transform-origin:center;animation:mmo .26s ease-in-out infinite alternate}@keyframes mmo{from{transform:scaleY(1)}to{transform:scaleY(2)}}
+.yawn:not(.happy) .m-mouth,.yawn.sleepy:not(.happy) .m-mouth-s{display:none}.yawn:not(.happy) .m-mouth-y{display:inline}.yawn .m-blink{transform:scaleY(.12)}
+.milo-still .m-wrap{animation:none!important}
+.mbl{position:fixed;z-index:19;border-radius:50%;border:1.5px solid rgba(255,255,255,.85);background:rgba(190,235,255,.35);pointer-events:none}
+#mchat .ft #mstill{display:block;margin:2px auto 0}
 </style></head><body>
 <header class="top" id="hd"></header>
 <div class="search"><input id="q" type="search" placeholder="Search menus, spa, activities, services…" autocomplete="off"></div>
@@ -317,7 +325,7 @@ async function askNotify(){
  try{const reg=await navigator.serviceWorker.ready;await reg.showNotification('Today at Velifushi · '+day,o)}catch(e){try{new Notification('Today at Velifushi · '+day,o)}catch(_){toast('Notifications are allowed, but this device could not show the test.');return}}
  toast('Notifications on – a test reminder was shown.');closeSheet()}
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v4';
+window.APP_V='v5';
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=true;try{toast('Updating to the latest guide…')}catch(e){}setTimeout(()=>location.reload(),900)});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const chk=()=>r.update().catch(()=>{});chk();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,1800000)}).catch(()=>{})}
 </script><script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
 const MILO_NAME='Milo';
@@ -326,14 +334,15 @@ const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 function miloSvg(p){return `<svg viewBox="-2 0 124 124" aria-hidden="true" focusable="false"><defs><radialGradient id="${p}b" cx="38%" cy="28%" r="80%"><stop offset="0" stop-color="#f8c98c"/><stop offset=".55" stop-color="#df8a35"/><stop offset="1" stop-color="#a65a1e"/></radialGradient><radialGradient id="${p}e" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#4c2b17"/><stop offset="1" stop-color="#1b0c05"/></radialGradient></defs>
 <ellipse class="m-sh" cx="60" cy="117" rx="30" ry="5" fill="#000" opacity=".28"/>
-<path d="M60 10C90 8 110 32 109 64C108 94 89 110 60 110C31 110 12 94 11 64C10 32 30 12 60 10Z" fill="url(#${p}b)" stroke="rgba(255,228,184,.75)" stroke-width="1.6"/>
+<path class="m-bodyp" d="M60 10C90 8 110 32 109 64C108 94 89 110 60 110C31 110 12 94 11 64C10 32 30 12 60 10Z" fill="url(#${p}b)" stroke="rgba(255,228,184,.75)" stroke-width="1.6"/>
+<g class="m-att"><g class="m-arm"><ellipse cx="111" cy="82" rx="9" ry="6.5" fill="#df8a35" stroke="rgba(255,228,184,.75)" stroke-width="1.4"/><circle cx="119" cy="77" r="5" fill="#f2b06a" stroke="rgba(255,228,184,.75)" stroke-width="1.2"/></g>
 <path d="M62 41a3 3 0 0 1 3-3a6 6 0 0 1 6 6a9 9 0 0 1-9 9a12 12 0 0 1-12-12a15 15 0 0 1 15-15" fill="none" stroke="#fff0d4" stroke-opacity=".5" stroke-width="3.2" stroke-linecap="round"/>
 <ellipse cx="33" cy="44" rx="11" ry="6" transform="rotate(-38 33 44)" fill="#fff" opacity=".34"/><circle cx="25" cy="55" r="2" fill="#fff" opacity=".4"/>
 <ellipse cx="27" cy="85" rx="8" ry="5" fill="#ff7b66" opacity=".42"/><ellipse cx="93" cy="85" rx="8" ry="5" fill="#ff7b66" opacity=".42"/>
 <g class="m-eyes"><g class="m-blink"><g class="m-pup"><ellipse cx="44" cy="70" rx="9.5" ry="12" fill="url(#${p}e)"/><ellipse cx="76" cy="70" rx="9.5" ry="12" fill="url(#${p}e)"/><ellipse cx="40.5" cy="64" rx="3.7" ry="4.4" fill="#fff"/><ellipse cx="72.5" cy="64" rx="3.7" ry="4.4" fill="#fff"/><circle cx="48" cy="76" r="1.8" fill="#fff" opacity=".85"/><circle cx="80" cy="76" r="1.8" fill="#fff" opacity=".85"/></g></g></g>
 <g class="m-happy" fill="none" stroke="#2a1408" stroke-width="4.2" stroke-linecap="round"><path d="M34 73Q44 61 54 73"/><path d="M66 73Q76 61 86 73"/></g>
 <path class="m-mouth" d="M52 88Q60 95 68 88" fill="none" stroke="#3a1c0a" stroke-width="2.6" stroke-linecap="round"/>
-<path class="m-mouth-h" d="M50 85Q60 102 70 85Z" fill="#7a2a1a"/><ellipse class="m-mouth-s" cx="60" cy="90" rx="3" ry="2.5" fill="#5a2a14"/>
+<path class="m-mouth-h" d="M50 85Q60 102 70 85Z" fill="#7a2a1a"/><ellipse class="m-mouth-s" cx="60" cy="90" rx="3" ry="2.5" fill="#5a2a14"/><ellipse class="m-mouth-y" cx="60" cy="91" rx="7" ry="8.5" fill="#7a2a1a"/>
 <g class="m-cos m-c-snorkel"><path d="M10 64Q60 52 110 64" fill="none" stroke="#0e5f86" stroke-width="7"/><path d="M108 58C119 46 117 26 107 17" fill="none" stroke="#19a7d4" stroke-width="6" stroke-linecap="round"/><circle cx="106" cy="14" r="5" fill="#ff7a59"/><circle cx="44" cy="70" r="16" fill="#aeeaff" fill-opacity=".26" stroke="#19a7d4" stroke-width="4.5"/><circle cx="76" cy="70" r="16" fill="#aeeaff" fill-opacity=".26" stroke="#19a7d4" stroke-width="4.5"/><path d="M58 70h4" stroke="#19a7d4" stroke-width="4"/><path d="M34 62a12 12 0 0 1 7-5M66 62a12 12 0 0 1 7-5" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/></g>
 <g class="m-cos m-c-spa"><path d="M12 44C10 14 34 -3 62 -3C90 -3 110 14 108 44C96 31 72 25 60 25C48 25 26 31 12 44Z" fill="#f6fafb" stroke="#c9d8de" stroke-width="1.4"/><path d="M26 30C40 14 72 9 98 24M20 38C38 24 76 18 104 34" fill="none" stroke="#cfe2e8" stroke-width="2"/><path d="M62 -3C70 -12 84 -10 82 -2C80 4 70 2 62 -3Z" fill="#e7f1f4" stroke="#c9d8de" stroke-width="1.2"/><circle cx="44" cy="70" r="13.5" fill="#bde58f" stroke="#68a83f" stroke-width="2.2"/><circle cx="44" cy="70" r="9" fill="#d9f2b4" stroke="#8cc45f" stroke-width="1"/><circle cx="76" cy="70" r="13.5" fill="#bde58f" stroke="#68a83f" stroke-width="2.2"/><circle cx="76" cy="70" r="9" fill="#d9f2b4" stroke="#8cc45f" stroke-width="1"/><g fill="#8cc45f"><circle cx="41" cy="68" r="1.2"/><circle cx="47" cy="72" r="1.2"/><circle cx="44" cy="74" r="1"/><circle cx="73" cy="68" r="1.2"/><circle cx="79" cy="72" r="1.2"/><circle cx="76" cy="66" r="1"/></g><ellipse cx="60" cy="97" rx="14" ry="5" fill="#9fd37a" opacity=".55"/></g>
 <g class="m-cos m-c-chef"><path d="M32 18C14 16 12 -6 31 -5C33 -19 56 -21 60 -9C66 -20 90 -16 89 -3C108 -6 108 16 88 18Z" fill="#fff" stroke="#d9e1e8" stroke-width="1.4"/><path d="M45 14V0M60 14V-6M75 14V0" stroke="#e6ecf1" stroke-width="1.6" fill="none" stroke-linecap="round"/><rect x="31" y="15" width="58" height="13" rx="3.5" fill="#f4f7fa" stroke="#d9e1e8" stroke-width="1.4"/></g>
@@ -345,11 +354,11 @@ function miloSvg(p){return `<svg viewBox="-2 0 124 124" aria-hidden="true" focus
 <g class="m-cos m-c-night"><path d="M16 36C18 12 40 2 62 2C84 2 102 14 104 36C86 24 36 24 16 36Z" fill="#2f55b0" stroke="#1d3a86" stroke-width="1.2"/><path d="M62 2C86 -14 114 2 118 40C110 22 98 8 80 6Z" fill="#2f55b0" stroke="#1d3a86" stroke-width="1.2"/><path d="M16 36C36 24 86 24 104 36" fill="none" stroke="#f4f7fb" stroke-width="7" stroke-linecap="round"/><circle cx="118" cy="42" r="7" fill="#f4f7fb" stroke="#d3dbea"/><path d="M50 12l1.6 3.4 3.6.4-2.7 2.4.8 3.6-3.3-1.9-3.3 1.9.8-3.6-2.7-2.4 3.6-.4Z" fill="#ffd84a"/><circle cx="76" cy="14" r="1.8" fill="#ffd84a"/><circle cx="90" cy="22" r="1.4" fill="#ffd84a"/></g>
 <g class="m-poof"><circle cx="30" cy="56" r="9"/><circle cx="92" cy="50" r="10"/><circle cx="60" cy="30" r="10"/><circle cx="40" cy="90" r="8"/><circle cx="84" cy="88" r="9"/><circle cx="60" cy="64" r="12"/></g>
 <g class="m-z"><text x="96" y="34">Z</text><text x="106" y="22">z</text></g>
-<g transform="translate(27 23)"><g fill="#fff7ea" stroke="#efb88a" stroke-width=".7"><ellipse cy="-6.5" rx="4.2" ry="7"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(72)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(144)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(216)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(288)"/></g><circle r="2.6" fill="#ffc83d"/></g></svg>`}
+<g transform="translate(27 23)"><g fill="#fff7ea" stroke="#efb88a" stroke-width=".7"><ellipse cy="-6.5" rx="4.2" ry="7"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(72)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(144)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(216)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(288)"/></g><circle r="2.6" fill="#ffc83d"/></g></g></svg>`}
 const root=document.createElement('button');root.id='milo';root.type='button';root.setAttribute('aria-label',`Chat with ${MILO_NAME}, your guide`);
-root.innerHTML=`<span class="milo-art"><span class="m-wrap">${miloSvg('mm')}</span></span>`;document.body.appendChild(root);
+root.innerHTML=`<span class="milo-art"><span class="m-wrap"><span class="m-tk">${miloSvg('mm')}</span></span></span>`;document.body.appendChild(root);
 const bub=document.createElement('div');bub.id='mbub';bub.hidden=true;bub.setAttribute('role','status');bub.setAttribute('aria-live','polite');document.body.appendChild(bub);
-const chat=document.createElement('div');chat.id='mchat';chat.hidden=true;chat.innerHTML=`<div class="pn" role="dialog" aria-modal="true" aria-label="Chat with ${MILO_NAME}"><div class="hd"><span class="av milo-art" id="mav">${miloSvg('ma')}</span><div class="tx"><b>${MILO_NAME}</b><small>Your guide to Cinnamon Velifushi</small></div><button class="cl" type="button" aria-label="Close ${MILO_NAME}">×</button></div><div class="nt">I’m ${MILO_NAME}, a guide – not an AI. I look things up in this app’s guide, right on your phone; nothing is sent anywhere.</div><div class="lg" id="mlog" aria-live="polite"></div><div class="ch" id="mch"></div><form id="mform"><input id="mq2" type="text" autocomplete="off" enterkeyhint="send" placeholder="Ask ${MILO_NAME} about the guide…" aria-label="Your question for ${MILO_NAME}"><button type="submit">Ask</button></form><div class="ft"><button type="button" id="mmute"></button><div class="ver">Guide version ${window.APP_V||''}</div></div></div>`;document.body.appendChild(chat);
+const chat=document.createElement('div');chat.id='mchat';chat.hidden=true;chat.innerHTML=`<div class="pn" role="dialog" aria-modal="true" aria-label="Chat with ${MILO_NAME}"><div class="hd"><span class="av milo-art" id="mav">${miloSvg('ma')}</span><div class="tx"><b>${MILO_NAME}</b><small>Your guide to Cinnamon Velifushi</small></div><button class="cl" type="button" aria-label="Close ${MILO_NAME}">×</button></div><div class="nt">I’m ${MILO_NAME}, a guide – not an AI. I look things up in this app’s guide, right on your phone; nothing is sent anywhere.</div><div class="lg" id="mlog" aria-live="polite"></div><div class="ch" id="mch"></div><form id="mform"><input id="mq2" type="text" autocomplete="off" enterkeyhint="send" placeholder="Ask ${MILO_NAME} about the guide…" aria-label="Your question for ${MILO_NAME}"><button type="submit">Ask</button></form><div class="ft"><button type="button" id="mmute"></button><button type="button" id="mstill"></button><div class="ver">Guide version ${window.APP_V||''}</div></div></div>`;document.body.appendChild(chat);
 const roots=[root,$('#mav')];
 function setCls(c,on){roots.forEach(r=>r.classList.toggle(c,!!on))}
 // ---- state: sleepy after 22:00 (to 06:00), goggles on island / dive pages
@@ -363,16 +372,91 @@ let curCos=null,ct;
 function applyCos(c){roots.forEach(r=>{COS.forEach(x=>r.classList.remove('cos-'+x));if(c)r.classList.add('cos-'+c)});root.dataset.costume=c||''}
 function upd(first){setCls('sleepy',late());const c=costume();if(c===curCos&&!first)return;const was=curCos;curCos=c;clearTimeout(ct);
  if(first||was===null||RM){applyCos(c);return}
- setCls('poof',0);void root.offsetWidth;setCls('poof',1);ct=setTimeout(()=>applyCos(c),170);setTimeout(()=>setCls('poof',0),700)}
+ setCls('poof',0);void root.offsetWidth;setCls('poof',1);ct=setTimeout(()=>applyCos(c),170);if(c==='spa')setTimeout(()=>heart(3000),700);setTimeout(()=>setCls('poof',0),700)}
 upd(true);
 ['hashchange','popstate','pageshow'].forEach(ev=>addEventListener(ev,()=>upd()));addEventListener('hashchange',closeChat);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)upd()});addEventListener('focus',()=>upd());
 setInterval(()=>upd(),700); // catches history.replaceState route changes (search box) that fire no event
 // ---- tap -> happy
-let ht;function happy(){root.classList.add('hop');setCls('happy',1);clearTimeout(ht);ht=setTimeout(()=>{root.classList.remove('hop');setCls('happy',0)},1500)}
+// ---- shapes & morphing: every shape is an 8-segment cubic path so points match one-to-one
+const still=()=>ls.get('vf_milo_still')=='1',animOK=()=>!RM&&!still();
+const io=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,back=t=>{const c=1.9;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)},sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const NUM=s=>s.trim().split(/\s+/).map(Number);
+const sub=a=>{const P=[];for(let i=0;i<a.length;i+=2)P.push([a[i],a[i+1]]);const m=(u,v)=>[(u[0]+v[0])/2,(u[1]+v[1])/2],o=[P[0]];for(let i=0;i<4;i++){const A=P[3*i],B=P[3*i+1],C=P[3*i+2],D=P[3*i+3],ab=m(A,B),bc=m(B,C),cd=m(C,D),abc=m(ab,bc),bcd=m(bc,cd),mid=m(abc,bcd);o.push(ab,abc,mid,bcd,cd,D)}return o.flat()};
+const flowerPts=(()=>{const pl=(r,a)=>{a*=Math.PI/180;return[60+r*Math.sin(a),60-r*Math.cos(a)]};const o=[pl(42,-22.5)];for(let k=0;k<8;k++){const t=k*45;o.push(pl(66,t-15),pl(66,t+15),pl(42,t+22.5))}return o.flat()})();
+const SHAPES={
+ blob:[...sub(NUM('60 10 90 8 110 32 109 64 108 94 89 110 60 110 31 110 12 94 11 64 10 32 30 12 60 10')),1,1,0,70],
+ drop:[...sub(NUM('60 -4 64 16 108 48 108 74 108 98 88 112 60 112 32 112 12 98 12 74 12 48 56 16 60 -4')),.92,.95,6,70],
+ oval:[...sub(NUM('60 4 82 4 100 29 100 60 100 91 82 116 60 116 38 116 20 91 20 60 20 29 38 4 60 4')),.9,1.08,0,62],
+ pancake:[...sub(NUM('60 50 90.9 50 116 63.4 116 80 116 96.6 90.9 110 60 110 29.1 110 4 96.6 4 80 4 63.4 29.1 50 60 50')),1.08,.6,0,110],
+ flower:[...flowerPts,.88,.88,0,62],
+ heart:[...sub(NUM('60 34 64 8 112 6 110 50 108 76 82 96 60 114 38 96 12 76 10 50 8 6 56 8 60 34')),.9,.9,-2,66]};
+const BODIES=[...document.querySelectorAll('.m-bodyp')],ATTS=[...document.querySelectorAll('.m-att')];
+let shp=SHAPES.blob.slice(),mRaf=0,mRes=null,seq=0;
+function setShape(v){let d='M'+v[0].toFixed(1)+' '+v[1].toFixed(1);for(let i=1;i<25;i++)d+=(i%3==1?'C':' ')+v[2*i].toFixed(1)+' '+v[2*i+1].toFixed(1);d+='Z';
+ const tf=`translate(0 ${v[52].toFixed(2)}) translate(60 ${v[53].toFixed(1)}) scale(${v[50].toFixed(3)} ${v[51].toFixed(3)}) translate(-60 ${(-v[53]).toFixed(1)})`;
+ BODIES.forEach(b=>b.setAttribute('d',d));ATTS.forEach(a=>a.setAttribute('transform',tf))}
+function morph(name,dur,ease){const to=SHAPES[name];return new Promise(res=>{if(!to)return res();if(mRes){const r=mRes;mRes=null;r()}cancelAnimationFrame(mRaf);
+ if(dur<=0){shp=to.slice();setShape(shp);return res()}
+ if(!animOK())return res();mRes=res;const from=shp.slice(),t0=performance.now();ease=ease||io;
+ (function st(n){const k=Math.min(1,(n-t0)/dur),e=ease(k);for(let i=0;i<54;i++)shp[i]=from[i]+(to[i]-from[i])*e;setShape(shp);if(k<1)mRaf=requestAnimationFrame(st);else{mRes=null;res()}})(t0)})}
+const tkEl=()=>root.querySelector('.m-tk');
+function anim(el,kf,o){try{return el.animate(kf,o)}catch(e){}}
+async function burst(){if(!animOK()||busy)return;const my=++seq;await morph('flower',150,io);if(my!==seq)return;await sleep(650);if(my!==seq)return;await morph('blob',380,back)}
+async function heart(hold){if(!animOK())return;const my=++seq;await morph('heart',380,io);if(my!==seq)return;anim(tkEl(),[{transform:'scale(1)'},{transform:'scale(1.09)'},{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:900,iterations:Math.max(1,Math.round(hold/900))});await sleep(hold);if(my!==seq)return;await morph('blob',420,back)}
+async function dropAntic(){if(!animOK())return;const my=++seq;await morph('drop',380,io);if(my!==seq)return;anim(tkEl(),[{transform:'translateY(0)'},{transform:'translateY(-4px)'},{transform:'translateY(0)'}],{duration:700,iterations:2});await sleep(1300);if(my!==seq)return;await morph('blob',380,back)}
+// ---- wandering (arc hops between safe spots found from element rects)
+let busy=false,pos={x:0,y:0,r:0},lockVec=null,lastInt=0,curSpot='HOME';
+const touchInt=()=>{lastInt=performance.now()};
+addEventListener('scroll',touchInt,{capture:true,passive:true});addEventListener('touchmove',touchInt,{passive:true});addEventListener('keydown',touchInt);addEventListener('input',touchInt);
+const typing=()=>{const a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)};
+const applyPos=()=>{root.style.transform=pos.x||pos.y||pos.r?`translate3d(${pos.x.toFixed(1)}px,${pos.y.toFixed(1)}px,0) rotate(${pos.r.toFixed(1)}deg)`:''};
+const atHome=()=>Math.abs(pos.x)<1&&Math.abs(pos.y)<1;
+function pupTo(x,y){const t=`translate(${(x*3.6).toFixed(2)}px,${(y*3).toFixed(2)}px)`;document.querySelectorAll('#milo .m-pup').forEach(p=>p.style.transform=t)}
+function geom(){const cs=getComputedStyle(root),vw=document.documentElement.clientWidth,vh=innerHeight,w=root.offsetWidth,h=root.offsetHeight;return{vw,vh,w,h,hx:vw-parseFloat(cs.right)-w,hy:vh-parseFloat(cs.bottom)-h}}
+function obstacles(skipLogo){const home=document.body.classList.contains('home');const sel=home?'.dial text,.dial image,.pill,.tb a,.tb .ck'+(skipLogo?'':',.logo'):'main a,main button,main input,main p,main li,main b,main h2,main h3,main small,main .n,main .d,main .pr,main .badge,main summary,main img,#hd h1,#hd button,#hd .clock';const o=[];document.querySelectorAll(sel).forEach(e=>{const r=e.getBoundingClientRect();if(r.width>0&&r.height>0)o.push(r)});return o}
+const hit=(a,b,s)=>a.left<b.right-s&&a.right>b.left+s&&a.top<b.bottom-s&&a.bottom>b.top+s;
+function spotsAll(){const g=geom(),L=[],home=document.body.classList.contains('home');if(!g.w)return{g,L};
+ const ys=()=>g.vh*(.28+Math.random()*.44)-g.h/2;
+ L.push({n:'BL',x:8,y:g.hy,r:0,vis:1});
+ for(let i=0;i<4;i++){L.push({n:'EDGE-R',x:g.vw-g.w-3,y:ys(),r:0,vis:1},{n:'PEEK-R',x:g.vw-g.w*.5,y:ys(),r:-18,look:[-1,.15],vis:1},{n:'PEEK-L',x:-g.w*.5,y:ys(),r:18,look:[1,.15],vis:1})}
+ const lg=home&&$('.logo');if(lg){const b=lg.getBoundingClientRect();for(let i=0;i<3;i++)L.push({n:'LOGO',x:b.left+b.width*(.25+Math.random()*.5)-g.w/2,y:b.top-g.h*.46,r:0,clip:.54,vis:.46,logo:1})}
+ return{g,L}}
+function validSpots(){const{g,L}=spotsAll(),o=obstacles(false),o2=obstacles(true);return L.filter(s=>{if(s.n==curSpot)return false;const v={left:Math.max(0,s.x),top:s.y,right:Math.min(g.vw,s.x+g.w),bottom:s.y+g.h*s.vis};if(v.top<6||v.bottom>g.vh-2||v.right-v.left<g.w*.4)return false;return !(s.logo?o2:o).some(r=>hit(v,r,3))})}
+async function hopTo(tx,ty,tr){busy=true;root.style.clipPath='';lockVec=null;pupTo(0,0);
+ await morph('pancake',120,io);const sx=pos.x,sy=pos.y,sr=pos.r,dist=Math.hypot(tx-sx,ty-sy),dur=Math.min(1400,650+dist*1.1),h=Math.min(150,44+dist*.25);morph('oval',150,io);
+ await new Promise(res=>{const t0=performance.now();(function f(n){const k=Math.min(1,(n-t0)/dur),e=io(k);pos.x=sx+(tx-sx)*e;pos.y=sy+(ty-sy)*e-h*4*k*(1-k);pos.r=sr+(tr-sr)*e+Math.sin(k*Math.PI*2)*7*(1-k);applyPos();if(k<1)requestAnimationFrame(f);else res()})(t0)});
+ await morph('pancake',80,io);morph('blob',340,back);busy=false}
+async function goSpot(s,g){curSpot=s.n;await hopTo(s.x-g.hx,s.y-g.hy,s.r);if(s.look){lockVec=s.look;pupTo(s.look[0],s.look[1])}if(s.clip)root.style.clipPath=`inset(0 0 ${s.clip*100}% 0)`}
+async function goHome(){curSpot='HOME';await hopTo(0,0,0);pos={x:0,y:0,r:0};applyPos()}
+function snapHome(){seq++;busy=false;pos={x:0,y:0,r:0};applyPos();root.style.clipPath='';lockVec=null;pupTo(0,0);curSpot='HOME';morph('blob',0)}
+function wanderAway(){const v=validSpots();if(!v.length)return false;const s=v[Math.floor(Math.random()*v.length)];goSpot(s,geom());return true}
+// ---- antics
+function anticWiggle(){anim(tkEl(),[{transform:'rotate(0)'},{transform:'rotate(-9deg)'},{transform:'rotate(8deg)'},{transform:'rotate(-6deg)'},{transform:'rotate(4deg)'},{transform:'rotate(0)'}],{duration:700,easing:'ease-in-out'})}
+function anticSpin(){anim(tkEl(),[{transform:'rotate(0) scale(1)'},{transform:'rotate(180deg) scale(1.12)'},{transform:'rotate(360deg) scale(1)'}],{duration:850,easing:'cubic-bezier(.5,0,.3,1)'})}
+function anticWave(){setCls('wave',1);const a=root.querySelector('.m-arm');if(a){a.style.transformOrigin='104px 88px';anim(a,[{transform:'rotate(0)'},{transform:'rotate(-34deg)'},{transform:'rotate(8deg)'},{transform:'rotate(-34deg)'},{transform:'rotate(8deg)'},{transform:'rotate(-34deg)'},{transform:'rotate(0)'}],{duration:1500,easing:'ease-in-out'})}setTimeout(()=>setCls('wave',0),1550)}
+function anticYawn(){setCls('yawn',1);setTimeout(()=>setCls('yawn',0),1700)}
+function antic(name){const L=['wiggle','spin','wave','drop'];if(late())L.push('yawn','yawn');const n=name||L[Math.floor(Math.random()*L.length)];({wiggle:anticWiggle,spin:anticSpin,wave:anticWave,drop:dropAntic,yawn:anticYawn})[n]()}
+// ---- bubble trail on island / dive pages
+function trail(){if(root.dataset.costume!=='snorkel'||!animOK()||document.hidden||!chat.hidden||$('#sheet').classList.contains('on'))return;const r=root.getBoundingClientRect();if(r.right<=0||r.left>=innerWidth)return;
+ for(let i=0;i<4;i++){const b=document.createElement('i');b.className='mbl';const s=5+Math.random()*6;b.style.cssText=`left:${(r.left+r.width*.3+Math.random()*r.width*.35).toFixed(0)}px;top:${(r.top+r.height*.12).toFixed(0)}px;width:${s.toFixed(1)}px;height:${s.toFixed(1)}px`;document.body.appendChild(b);
+  const a=anim(b,[{transform:'translate(0,0) scale(.6)',opacity:.9},{transform:`translate(${((Math.random()-.5)*26).toFixed(0)}px,${(-60-Math.random()*50).toFixed(0)}px) scale(1.1)`,opacity:0}],{duration:1500+Math.random()*700,delay:i*230,easing:'ease-out',fill:'both'});if(a)a.onfinish=()=>b.remove();else b.remove()}}
+(function tl(){setTimeout(()=>{trail();tl()},6500+Math.random()*3500)})();
+// ---- scheduler: one action per 12-25 s, paused whenever the page is busy
+let st,nextAt=performance.now()+(13+Math.random()*10)*1000,awayN=0;
+const canMove=()=>!document.hidden&&chat.hidden&&!$('#sheet').classList.contains('on')&&!typing()&&performance.now()-lastInt>1800&&bub.hidden&&!busy;
+function schedule(){clearTimeout(st);st=setTimeout(act,Math.max(500,nextAt-performance.now()))}
+function act(){if(!animOK()||!canMove()){nextAt=performance.now()+2500;return schedule()}
+ let did=false;if(!atHome()){awayN++;if(awayN>=1&&Math.random()<.6){goHome();did=true;awayN=0}}else if(Math.random()<.62)did=wanderAway();
+ if(!did)antic();nextAt=performance.now()+(12+Math.random()*13)*1000;schedule()}
+schedule();
+addEventListener('resize',snapHome);addEventListener('hashchange',()=>{if(!atHome())snapHome()});
+document.body.classList.toggle('milo-still',still());
+
+let ht;function happy(){root.classList.add('hop');setCls('happy',1);clearTimeout(ht);ht=setTimeout(()=>{root.classList.remove('hop');setCls('happy',0)},1500);burst()}
 // ---- blinking + eyes follow the pointer
 if(!RM){(function bl(){setTimeout(()=>{setCls('blink',1);setTimeout(()=>{setCls('blink',0);if(Math.random()<.25)setTimeout(()=>{setCls('blink',1);setTimeout(()=>setCls('blink',0),110)},170);bl()},130)},2400+Math.random()*3800)})();
- let raf=0,px=0,py=0;const look=(x,y)=>{px=x;py=y;if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const r=root.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height*.55,dx=px-cx,dy=py-cy,d=Math.hypot(dx,dy)||1,k=Math.min(1,d/160);const tx=dx/d*3.6*k,ty=dy/d*3*k;root.querySelector('.m-pup').style.transform=`translate(${tx.toFixed(2)}px,${ty.toFixed(2)}px)`;const a=$('#mav .m-pup');if(a)a.style.transform=`translate(${tx.toFixed(2)}px,${ty.toFixed(2)}px)`})};
+ let raf=0,px=0,py=0;const look=(x,y)=>{px=x;py=y;if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const r=root.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height*.55,dx=px-cx,dy=py-cy,d=Math.hypot(dx,dy)||1,k=Math.min(1,d/160);let tx=dx/d*3.6*k,ty=dy/d*3*k;if(lockVec){tx=lockVec[0]*3.6;ty=lockVec[1]*3}root.querySelector('.m-pup').style.transform=`translate(${tx.toFixed(2)}px,${ty.toFixed(2)}px)`;const a=$('#mav .m-pup');if(a)a.style.transform=`translate(${tx.toFixed(2)}px,${ty.toFixed(2)}px)`})};look.lock=1;
  addEventListener('pointermove',e=>look(e.clientX,e.clientY),{passive:true});addEventListener('pointerdown',e=>look(e.clientX,e.clientY),{passive:true});addEventListener('touchstart',e=>{const t=e.touches[0];if(t)look(t.clientX,t.clientY)},{passive:true})}
 // ---- speech bubbles from the real data (at most one per visit)
 let shown=false,bt,cur;
@@ -389,10 +473,10 @@ function tips(){const n=mv(),day=n.day,T=[];
  return T}
 function pick(){const T=tips();if(late()){const a=T.find(t=>t.k=='act');return a||{t:'Zzz… it’s sleepy time. The guide is here whenever you need it.',h:'#/compendium',b:'Compendium'}}
  const i=(+ls.get('vf_milo_i')||0);ls.set('vf_milo_i',String(i+1));return T[i%T.length]}
-function hideBub(){bub.hidden=true;clearTimeout(bt)}
-function showBub(t){shown=true;cur=t;bub.innerHTML=`<button class="x" type="button" aria-label="Dismiss ${MILO_NAME}’s tip">×</button><button class="hush" type="button" aria-label="Hush ${MILO_NAME}: stop speech bubbles" title="Hush ${MILO_NAME}">🔕</button><button class="t" type="button" aria-label="${esc(t.t)} Tap to open ${esc(t.b)}">${esc(t.t)}</button>`;bub.hidden=false;bt=setTimeout(hideBub,18000)}
+function hideBub(){bub.hidden=true;setCls('talk',0);clearTimeout(bt)}
+function showBub(t){shown=true;cur=t;bub.innerHTML=`<button class="x" type="button" aria-label="Dismiss ${MILO_NAME}’s tip">×</button><button class="hush" type="button" aria-label="Hush ${MILO_NAME}: stop speech bubbles" title="Hush ${MILO_NAME}">🔕</button><button class="t" type="button" aria-label="${esc(t.t)} Tap to open ${esc(t.b)}">${esc(t.t)}</button>`;bub.hidden=false;setCls('talk',1);setTimeout(()=>setCls('talk',0),3600);bt=setTimeout(hideBub,18000)}
 bub.addEventListener('click',e=>{const el=e.target;if(el.closest('.x')){hideBub()}else if(el.closest('.hush')){ls.set('vf_milo_mute','1');mlab();hideBub();toast(`${MILO_NAME} will stay quiet. You can turn bubbles back on in his chat.`)}else if(el.closest('.t')){hideBub();if(cur)location.hash=cur.h}});
-function tryBub(n){if(shown||muted())return;if($('#sheet').classList.contains('on')||!chat.hidden){if(n<14)setTimeout(()=>tryBub(n+1),3000);return}showBub(pick())}
+function tryBub(n){if(shown||muted())return;if($('#sheet').classList.contains('on')||!chat.hidden||!atHome()||busy){if(n<20)setTimeout(()=>tryBub(n+1),3000);return}showBub(pick())}
 setTimeout(()=>tryBub(0),7000);
 // ---- chat: client-side matching over the guide
 const STOP=new Set('what whats when where how much many is are the a an do does you your have has any there me my to tell show about i can for of in at on please get it we our us and or with price prices cost rate rates fee fees time times hour hours open opens opening close closes closing'.split(' '));
@@ -430,7 +514,7 @@ function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[
  return A(`${part?'I found close matches':'Here’s what the guide says'}${hits.length>1?` (${hits.length} entries)`:''}:`,acts,top.map(x=>`<a class="mhit" href="${x.h.h}"><b>${esc(short(x.h.t,70))}</b><span>${esc(x.h.s)} · ${esc(short(x.h.x,90))}</span></a>`).join(''))}
 const lg=$('#mlog');
 function say(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;return d}
-function ask(q){q=q.trim();if(!q)return;say('mu',esc(q));const r=answer(q);say('mb',esc(r.t)+r.extra+(r.acts.length?`<div class="mact">${r.acts.map((a,i)=>`<a class="${i?'alt':''}" href="${a[1]}">${esc(a[0])}</a>`).join('')}</div>`:''));}
+function ask(q){q=q.trim();if(!q)return;say('mu',esc(q));if(/thank/i.test(q)){heartAv()}const r=answer(q);say('mb',esc(r.t)+r.extra+(r.acts.length?`<div class="mact">${r.acts.map((a,i)=>`<a class="${i?'alt':''}" href="${a[1]}">${esc(a[0])}</a>`).join('')}</div>`:''));}
 const CH=['What’s on today?','What’s open now?','What time is Marlin open?','Snorkelling price','Spa & 15% voucher','Spa massages','Wi-Fi'];
 $('#mch').innerHTML=CH.map(c=>`<button type="button">${esc(c)}</button>`).join('');
 $('#mch').addEventListener('click',e=>{const b=e.target.closest('button');if(b)ask(b.textContent)});
@@ -438,13 +522,16 @@ $('#mform').addEventListener('submit',e=>{e.preventDefault();const i=$('#mq2');a
 lg.addEventListener('click',e=>{if(e.target.closest('a'))closeChat()});
 const mm=$('#mmute');function mlab(){mm.textContent=muted()?`Speech bubbles are off – turn them on`:`Speech bubbles are on – mute ${MILO_NAME}`}mlab();
 mm.onclick=()=>{ls.set('vf_milo_mute',muted()?'0':'1');mlab()};
+const ms=$('#mstill');function slab(){ms.textContent=still()?`${MILO_NAME} is staying still – let him move again`:`Keep ${MILO_NAME} still`}slab();
+ms.onclick=()=>{ls.set('vf_milo_still',still()?'0':'1');document.body.classList.toggle('milo-still',still());if(still())snapHome();slab()};
 let greeted=false,lastFocus;
 function openChat(){hideBub();shown=true;lastFocus=document.activeElement;chat.hidden=false;document.body.classList.add('mchat-on');happyAv();if(!greeted){greeted=true;say('mb',`Hi, I’m ${MILO_NAME} 👋 your guide to Cinnamon Velifushi. Everything I say comes from this guide – ask me about hours, activities, menus, the spa or excursions.`)}chat.querySelector('.cl').focus()}
+function heartAv(){heart(2600)}
 function happyAv(){const a=$('#mav');a.classList.add('happy');setTimeout(()=>a.classList.remove('happy'),1500)}
 function closeChat(){if(chat.hidden)return;chat.hidden=true;document.body.classList.remove('mchat-on');if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}
 chat.querySelector('.cl').onclick=closeChat;chat.addEventListener('click',e=>{if(e.target===chat)closeChat()});
 addEventListener('keydown',e=>{if(e.key=='Escape'){closeChat();hideBub()}});
 root.addEventListener('click',()=>{happy();if(chat.hidden)openChat()});
-window.Milo={ask,openChat,costume:()=>curCos};
+window.Milo={ask,openChat,costume:()=>curCos,morph:(n,d)=>morph(n,d),antic,burst,heart,spots:()=>validSpots().map(s=>s.n),go:n=>{const{g,L}=spotsAll(),s=L.find(x=>x.n==n);if(s)return goSpot(s,g)},home:goHome,still,pos:()=>({...pos,spot:curSpot})};
 })();
 </script></body></html>
