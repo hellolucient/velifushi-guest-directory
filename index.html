@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#06205e">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Velifushi">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Milo">
 <title>Cinnamon Velifushi – Guest Directory</title>
 <meta name="description" content="Cinnamon Velifushi Maldives guest directory: menus, Mandara Spa, activities, excursions, dive centre, resort map and more.">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Cinnamon Velifushi Maldives">
@@ -14,7 +14,7 @@
 <meta property="og:url" content="https://hellolucient.github.io/velifushi-guest-directory/">
 <meta property="og:image" content="https://hellolucient.github.io/velifushi-guest-directory/img/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://hellolucient.github.io/velifushi-guest-directory/img/og.jpg">
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="icon" href="favicon.ico" sizes="any">
 <style>
 :root{--p:#0b3a7a;--p2:#1c6aa8;--t:#1f9aa3;--sea:#e6f5f5;--sand:#f3f6f9;--ink:#241a33;--mu:#6d6479;--ok:#18864b;--no:#b3392f;--card:#fff;--r:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -325,7 +325,7 @@ async function askNotify(){
  try{const reg=await navigator.serviceWorker.ready;await reg.showNotification('Today at Velifushi · '+day,o)}catch(e){try{new Notification('Today at Velifushi · '+day,o)}catch(_){toast('Notifications are allowed, but this device could not show the test.');return}}
  toast('Notifications on – a test reminder was shown.');closeSheet()}
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v5';
+window.APP_V='v6';
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=true;try{toast('Updating to the latest guide…')}catch(e){}setTimeout(()=>location.reload(),900)});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const chk=()=>r.update().catch(()=>{});chk();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,1800000)}).catch(()=>{})}
 </script><script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
 const MILO_NAME='Milo';

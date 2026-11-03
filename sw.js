@@ -1,5 +1,5 @@
-const C='velifushi-v5';
-const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','apple-touch-icon.png','img/aerial.jpg','img/logo.png','img/map.webp'];
+const C='velifushi-v6';
+const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png','favicon-32.png','favicon.ico','img/aerial.jpg','img/logo.png','img/map.webp'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CORE.concat(['ic-island','ic-menus','ic-sustain','ic-comp','ic-act','ic-map','ic-sig','ic-flower'].map(n=>'img/'+n+'.png')))));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!=C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET'||!r.url.startsWith(self.location.origin))return;
