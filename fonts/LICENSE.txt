@@ -1,2 +1,4 @@
 Cormorant Garamond (Christian Thalmann / Catharsis Fonts) and Montserrat (Julieta Ulanovsky et al.) are licensed under the SIL Open Font License 1.1. https://openfontlicense.org
 Used on the spa page as web alternatives to the printed menu typefaces (Sainte Colombe, Gotham).
+Jost (Owen Earl) and Kaushan Script (Impallari Type) are SIL OFL 1.1.
+Fredoka (Milena Brandão, Hafontia) is SIL OFL 1.1.
