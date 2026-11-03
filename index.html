@@ -948,7 +948,7 @@ let shown=false,bt,lastBub=Date.now();
 const muted=()=>ls.get('vf_milo_mute')=='1';
 const PROMPTS=['Need help?','How can I help?','Looking for something?','Questions? Ask me!','Need a hand?'];
 function hideBub(){bub.hidden=true;setCls('talk',0);clearTimeout(bt)}
-function showBub(){shown=true;lastBub=Date.now();const i=(+ls.get('vf_milo_i')||0);ls.set('vf_milo_i',String(i+1));const t=PROMPTS[i%PROMPTS.length];
+function showBub(){shown=true;ls.set('vf_milo_shown','1');lastBub=Date.now();const i=(+ls.get('vf_milo_i')||0);ls.set('vf_milo_i',String(i+1));const t=PROMPTS[i%PROMPTS.length];
  bub.innerHTML=`<button class="t" type="button" aria-label="${esc(t)} Tap to ask ${MILO_NAME}">${esc(t)}</button>`;bub.hidden=false;if(animOK())setCls('talk',1);setTimeout(()=>setCls('talk',0),2400);clearTimeout(bt);bt=setTimeout(hideBub,5500)}
 bub.addEventListener('click',()=>{hideBub();happy();if(chat.hidden)openChat()});
 // at load, then at most one more now and then (>=2 min apart, idle, not muted); the very first visit always gets one
@@ -956,6 +956,8 @@ function tryBub(n,force){if(!force&&(muted()&&ls.get('vf_milo_seen')))return;
  if(document.hidden||$('#sheet').classList.contains('on')||!chat.hidden||typing()||busy||!atHome()){if(n<8)setTimeout(()=>tryBub(n+1,force),1500);return}
  ls.set('vf_milo_seen','1');showBub()}
 setTimeout(()=>tryBub(0,!ls.get('vf_milo_seen')),1400);
+// the install sheet covers Milo: hide the bubble while it is open and show it once the guest closes it
+new MutationObserver(()=>{if($('#sheet').classList.contains('on')){hideBub();ls.set('vf_milo_shown','')}else if(!ls.get('vf_milo_shown'))setTimeout(()=>tryBub(0,true),700)}).observe($('#sheet'),{attributes:true,attributeFilter:['class']});
 addEventListener('hashchange',()=>{if(Date.now()-lastBub>60000)setTimeout(()=>tryBub(0),1200)});
 setInterval(()=>{if(Date.now()-lastBub>120000&&bub.hidden&&performance.now()-lastInt>4000)tryBub(0)},20000);
 // ---- chat: client-side matching over the guide
