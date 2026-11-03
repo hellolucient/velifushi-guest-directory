@@ -116,6 +116,67 @@ body.home main{padding:0;max-width:none;margin:0}
 #sheet .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 #sheet .sh{display:inline-block;vertical-align:-4px;width:18px;height:18px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#06205e;color:#fff;padding:11px 18px;border-radius:24px;font-size:14px;z-index:60;display:none;max-width:88vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+/* ---- Milo the guide */
+#milo{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom) + 72px);width:54px;height:58px;z-index:20;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 5px 7px rgba(0,0,0,.38)) drop-shadow(0 0 9px rgba(255,196,120,.28));animation:gin .7s both 1.6s}
+body.home #milo{bottom:calc(env(safe-area-inset-bottom) + 10px);width:64px;height:68px}
+#milo:focus-visible{outline:3px solid #7fd8ff;outline-offset:3px;border-radius:50%}
+.milo-art{display:block;width:100%;height:100%}
+.milo-art svg{display:block;width:100%;height:100%;overflow:visible}
+.m-wrap{display:block;width:100%;height:100%;transform-origin:50% 92%;animation:mbob 3.8s ease-in-out infinite}
+#milo.hop .m-wrap{animation:mhop .7s ease-out}
+@keyframes mbob{0%,100%{transform:translateY(0) scale(1.04,.96)}50%{transform:translateY(-5px) scale(.97,1.04)}}
+@keyframes mhop{0%{transform:scale(1.12,.86)}30%{transform:translateY(-16px) scale(.92,1.1)}62%{transform:translateY(0) scale(1.1,.9)}100%{transform:scale(1)}}
+.m-sh{transform-origin:60px 116px}
+.m-pup{transition:transform .14s ease-out}
+.m-blink{transform-origin:60px 70px;transition:transform .08s}
+.blink .m-blink{transform:scaleY(.07)}
+.sleepy .m-blink{transform:scaleY(.36)}
+.sleepy.blink .m-blink{transform:scaleY(.07)}
+.m-happy,.m-mouth-h,.m-mouth-s,.m-gog,.m-z{display:none}
+.happy .m-eyes,.happy .m-mouth{display:none}.happy .m-happy,.happy .m-mouth-h{display:inline}
+.sleepy:not(.happy) .m-mouth{display:none}.sleepy:not(.happy) .m-mouth-s{display:inline}.sleepy:not(.happy) .m-z{display:inline}
+.goggles .m-gog{display:inline}
+.m-z text{font:700 13px system-ui,sans-serif;fill:#cfe9ff;animation:mz 2.6s ease-in-out infinite}
+.m-z text:nth-child(2){animation-delay:.9s;font-size:10px}
+@keyframes mz{0%{opacity:0;transform:translate(0,6px)}40%{opacity:1}100%{opacity:0;transform:translate(6px,-8px)}}
+#mbub{position:fixed;right:76px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:21;max-width:min(320px,calc(100vw - 92px));background:#fff;color:#06205e;border-radius:16px;padding:9px 12px;font-size:12.5px;line-height:1.32;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:mpop .35s cubic-bezier(.2,.9,.3,1.3) both;transform-origin:100% 90%}
+body:not(.home) #mbub{bottom:calc(env(safe-area-inset-bottom) + 84px);right:68px}
+#mbub:after{content:"";position:absolute;right:-7px;bottom:16px;border:7px solid transparent;border-left-color:#fff;border-right:0}
+#mbub[hidden]{display:none}
+#mbub .t{display:block;width:100%;background:none;border:0;padding:0 30px 0 0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+#mbub .x,#mbub .hush{position:absolute;right:1px;width:30px;height:28px;border:0;background:none;font-size:19px;line-height:1;color:#5b7191;cursor:pointer;padding:0}
+#mbub .x{top:2px}#mbub .hush{top:28px;font-size:14px}
+@keyframes mpop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+#mchat{position:fixed;inset:0;z-index:40;background:rgba(3,12,40,.5);display:flex;align-items:flex-end;justify-content:center}
+#mchat[hidden]{display:none}
+#mchat .pn{background:#f6f9fc;width:100%;max-width:520px;height:min(80vh,680px);height:min(80dvh,680px);border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:up .3s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom)}
+@media(min-width:560px){#mchat{align-items:center}#mchat .pn{border-radius:22px}}
+#mchat .hd{display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(120deg,#06205e,#0b4f93);color:#fff}
+#mchat .av{width:42px;height:44px;flex:none}
+#mchat .hd b{display:block;font-size:17px}#mchat .hd small{opacity:.85;font-size:12px}
+#mchat .hd .tx{flex:1;min-width:0}
+#mchat .cl{width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:22px;cursor:pointer}
+#mchat .nt{font-size:11.5px;color:#4d6480;padding:7px 14px;background:#e8f1fa}
+#mchat .lg{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.mb,.mu{max-width:88%;padding:9px 12px;border-radius:15px;font-size:14px;line-height:1.38}
+.mb{align-self:flex-start;background:#fff;border:1px solid #d6e3f0;color:#0d2344;border-bottom-left-radius:4px}
+.mu{align-self:flex-end;background:#0b4f93;color:#fff;border-bottom-right-radius:4px}
+.mb .ln{margin-top:3px}
+.mact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mact a{background:#0b3a7a;color:#fff;border-radius:16px;padding:7px 12px;font-size:13px;font-weight:600;text-decoration:none}
+.mact a.alt{background:#e3eef9;color:#0b3a7a}
+.mhit{display:block;margin-top:6px;padding:7px 10px;border:1px solid #d6e3f0;border-radius:10px;background:#f6f9fc;text-decoration:none;color:#0d2344}
+.mhit b{display:block;font-size:13px}.mhit span{display:block;font-size:12px;color:#4d6480}
+#mchat .ch{display:flex;gap:6px;overflow-x:auto;padding:4px 14px 8px;scrollbar-width:none}
+#mchat .ch::-webkit-scrollbar{display:none}
+#mchat .ch button{flex:none;border:1px solid #b6cbe3;background:#fff;color:#0b3a7a;border-radius:16px;padding:7px 12px;font-size:13px;cursor:pointer}
+#mchat form{display:flex;gap:8px;padding:6px 14px 8px}
+#mchat input{flex:1;min-width:0;border:1px solid #b6cbe3;border-radius:22px;padding:10px 14px;font-size:16px;background:#fff}
+#mchat form button{border:0;border-radius:22px;background:#0b3a7a;color:#fff;font-weight:600;padding:0 18px;font-size:14px;cursor:pointer}
+#mchat .ft{text-align:center;padding:0 14px 10px;font-size:12px}
+#mchat .ft button{background:none;border:0;color:#0b3a7a;text-decoration:underline;cursor:pointer;font-size:12px}
+body.mchat-on #milo,body.mchat-on #mbub{visibility:hidden}
+#sheet.on~#milo,#sheet.on~#mbub,#sheet.on~#mchat{display:none}
 </style></head><body>
 <header class="top" id="hd"></header>
 <div class="search"><input id="q" type="search" placeholder="Search menus, spa, activities, services…" autocomplete="off"></div>
@@ -252,4 +313,112 @@ async function askNotify(){
  toast('Notifications on – a test reminder was shown.');closeSheet()}
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js');
+</script><script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
+const MILO_NAME='Milo';
+(function(){
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+function miloSvg(p){return `<svg viewBox="-2 0 124 124" aria-hidden="true" focusable="false"><defs><radialGradient id="${p}b" cx="38%" cy="28%" r="80%"><stop offset="0" stop-color="#f8c98c"/><stop offset=".55" stop-color="#df8a35"/><stop offset="1" stop-color="#a65a1e"/></radialGradient><radialGradient id="${p}e" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#4c2b17"/><stop offset="1" stop-color="#1b0c05"/></radialGradient></defs>
+<ellipse class="m-sh" cx="60" cy="117" rx="30" ry="5" fill="#000" opacity=".28"/>
+<path d="M60 10C90 8 110 32 109 64C108 94 89 110 60 110C31 110 12 94 11 64C10 32 30 12 60 10Z" fill="url(#${p}b)" stroke="rgba(255,228,184,.75)" stroke-width="1.6"/>
+<path d="M62 41a3 3 0 0 1 3-3a6 6 0 0 1 6 6a9 9 0 0 1-9 9a12 12 0 0 1-12-12a15 15 0 0 1 15-15" fill="none" stroke="#fff0d4" stroke-opacity=".5" stroke-width="3.2" stroke-linecap="round"/>
+<ellipse cx="33" cy="44" rx="11" ry="6" transform="rotate(-38 33 44)" fill="#fff" opacity=".34"/><circle cx="25" cy="55" r="2" fill="#fff" opacity=".4"/>
+<ellipse cx="27" cy="85" rx="8" ry="5" fill="#ff7b66" opacity=".42"/><ellipse cx="93" cy="85" rx="8" ry="5" fill="#ff7b66" opacity=".42"/>
+<g class="m-eyes"><g class="m-blink"><g class="m-pup"><ellipse cx="44" cy="70" rx="9.5" ry="12" fill="url(#${p}e)"/><ellipse cx="76" cy="70" rx="9.5" ry="12" fill="url(#${p}e)"/><ellipse cx="40.5" cy="64" rx="3.7" ry="4.4" fill="#fff"/><ellipse cx="72.5" cy="64" rx="3.7" ry="4.4" fill="#fff"/><circle cx="48" cy="76" r="1.8" fill="#fff" opacity=".85"/><circle cx="80" cy="76" r="1.8" fill="#fff" opacity=".85"/></g></g></g>
+<g class="m-happy" fill="none" stroke="#2a1408" stroke-width="4.2" stroke-linecap="round"><path d="M34 73Q44 61 54 73"/><path d="M66 73Q76 61 86 73"/></g>
+<path class="m-mouth" d="M52 88Q60 95 68 88" fill="none" stroke="#3a1c0a" stroke-width="2.6" stroke-linecap="round"/>
+<path class="m-mouth-h" d="M50 85Q60 102 70 85Z" fill="#7a2a1a"/><ellipse class="m-mouth-s" cx="60" cy="90" rx="3" ry="2.5" fill="#5a2a14"/>
+<g class="m-gog"><path d="M10 64Q60 52 110 64" fill="none" stroke="#0e5f86" stroke-width="7"/><path d="M108 58C119 46 117 26 107 17" fill="none" stroke="#19a7d4" stroke-width="6" stroke-linecap="round"/><circle cx="106" cy="14" r="5" fill="#ff7a59"/><circle cx="44" cy="70" r="16" fill="#aeeaff" fill-opacity=".26" stroke="#19a7d4" stroke-width="4.5"/><circle cx="76" cy="70" r="16" fill="#aeeaff" fill-opacity=".26" stroke="#19a7d4" stroke-width="4.5"/><path d="M58 70h4" stroke="#19a7d4" stroke-width="4"/><path d="M34 62a12 12 0 0 1 7-5M66 62a12 12 0 0 1 7-5" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/></g>
+<g class="m-z"><text x="96" y="34">Z</text><text x="106" y="22">z</text></g>
+<g transform="translate(27 23)"><g fill="#fff7ea" stroke="#efb88a" stroke-width=".7"><ellipse cy="-6.5" rx="4.2" ry="7"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(72)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(144)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(216)"/><ellipse cy="-6.5" rx="4.2" ry="7" transform="rotate(288)"/></g><circle r="2.6" fill="#ffc83d"/></g></svg>`}
+const root=document.createElement('button');root.id='milo';root.type='button';root.setAttribute('aria-label',`Chat with ${MILO_NAME}, your guide`);
+root.innerHTML=`<span class="milo-art"><span class="m-wrap">${miloSvg('mm')}</span></span>`;document.body.appendChild(root);
+const bub=document.createElement('div');bub.id='mbub';bub.hidden=true;bub.setAttribute('role','status');bub.setAttribute('aria-live','polite');document.body.appendChild(bub);
+const chat=document.createElement('div');chat.id='mchat';chat.hidden=true;chat.innerHTML=`<div class="pn" role="dialog" aria-modal="true" aria-label="Chat with ${MILO_NAME}"><div class="hd"><span class="av milo-art" id="mav">${miloSvg('ma')}</span><div class="tx"><b>${MILO_NAME}</b><small>Your guide to Cinnamon Velifushi</small></div><button class="cl" type="button" aria-label="Close ${MILO_NAME}">×</button></div><div class="nt">I’m ${MILO_NAME}, a guide – not an AI. I look things up in this app’s guide, right on your phone; nothing is sent anywhere.</div><div class="lg" id="mlog" aria-live="polite"></div><div class="ch" id="mch"></div><form id="mform"><input id="mq2" type="text" autocomplete="off" enterkeyhint="send" placeholder="Ask ${MILO_NAME} about the guide…" aria-label="Your question for ${MILO_NAME}"><button type="submit">Ask</button></form><div class="ft"><button type="button" id="mmute"></button></div></div>`;document.body.appendChild(chat);
+const roots=[root,$('#mav')];
+function setCls(c,on){roots.forEach(r=>r.classList.toggle(c,!!on))}
+// ---- state: sleepy after 22:00 (to 06:00), goggles on island / dive pages
+const late=()=>{const m=mv().min;return m>=1320||m<360};
+const gog=()=>/^#\/(island|dive|excursions)/.test(location.hash);
+function upd(){setCls('sleepy',late());setCls('goggles',gog())}
+upd();addEventListener('hashchange',()=>{upd();closeChat()});setInterval(upd,60000);
+// ---- tap -> happy
+let ht;function happy(){root.classList.add('hop');setCls('happy',1);clearTimeout(ht);ht=setTimeout(()=>{root.classList.remove('hop');setCls('happy',0)},1500)}
+// ---- blinking + eyes follow the pointer
+if(!RM){(function bl(){setTimeout(()=>{setCls('blink',1);setTimeout(()=>{setCls('blink',0);if(Math.random()<.25)setTimeout(()=>{setCls('blink',1);setTimeout(()=>setCls('blink',0),110)},170);bl()},130)},2400+Math.random()*3800)})();
+ let raf=0,px=0,py=0;const look=(x,y)=>{px=x;py=y;if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const r=root.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height*.55,dx=px-cx,dy=py-cy,d=Math.hypot(dx,dy)||1,k=Math.min(1,d/160);const tx=dx/d*3.6*k,ty=dy/d*3*k;root.querySelector('.m-pup').style.transform=`translate(${tx.toFixed(2)}px,${ty.toFixed(2)}px)`;const a=$('#mav .m-pup');if(a)a.style.transform=`translate(${tx.toFixed(2)}px,${ty.toFixed(2)}px)`})};
+ addEventListener('pointermove',e=>look(e.clientX,e.clientY),{passive:true});addEventListener('pointerdown',e=>look(e.clientX,e.clientY),{passive:true});addEventListener('touchstart',e=>{const t=e.touches[0];if(t)look(t.clientX,t.clientY)},{passive:true})}
+// ---- speech bubbles from the real data (at most one per visit)
+let shown=false,bt,cur;
+const muted=()=>ls.get('vf_milo_mute')=='1';
+function tips(){const n=mv(),day=n.day,T=[];
+ const list=(D.act[day]||[]).concat(D.ent[day]||[]).map(x=>{const m=x[0].match(/(\d+):(\d+)\D+(\d+):(\d+)/);return m?{s:+m[1]*60+ +m[2],e:+m[3]*60+ +m[4],x}:null}).filter(Boolean).sort((a,b)=>a.s-b.s);
+ const cur=list.find(a=>a.s<=n.min&&n.min<a.e),a=cur||list.find(a=>a.s>n.min);
+ if(a)T.push({k:'act',t:`${cur?'On right now':'Next today'}: ${a.x[1]}, ${fmt(a.s)} – ${fmt(a.e)}${a.x[2]?' at '+a.x[2]:''}.`,h:'#/activities',b:'See the week'});
+ const op=D.venues.filter(v=>status(v.hours).s=='open').map(v=>v.name.replace(/ \(.*/,''));
+ if(op.length)T.push({k:'open',t:`Open right now: ${op.slice(0,3).join(', ')}${op.length>3?' and '+(op.length-3)+' more':''}.`,h:'#/dining',b:'All hours'});
+ T.push({k:'spa1',t:'Mandara Spa: 15% off spa treatments & wellness programmes during your stay (full menu rates, not combinable).',h:'#/spa',b:'Open the spa'});
+ T.push({k:'spa2',t:'Visit Mandara Spa for a complimentary 5-minute massage and ginger tea – present the voucher there.',h:'#/spa',b:'Open the spa'});
+ const sc=D.exc.find(e=>e.n=='Sunset Cruise');if(sc)T.push({k:'exc',t:`${sc.n}: ${sc.p}, ${sc.by.toLowerCase()}${sc.min?', '+sc.min.toLowerCase():''}. Book at Reception / Guest Relations.`,h:'#/excursions',b:'Excursions'});
+ return T}
+function pick(){const T=tips();if(late()){const a=T.find(t=>t.k=='act');return a||{t:'Zzz… it’s sleepy time. The guide is here whenever you need it.',h:'#/compendium',b:'Compendium'}}
+ const i=(+ls.get('vf_milo_i')||0);ls.set('vf_milo_i',String(i+1));return T[i%T.length]}
+function hideBub(){bub.hidden=true;clearTimeout(bt)}
+function showBub(t){shown=true;cur=t;bub.innerHTML=`<button class="x" type="button" aria-label="Dismiss ${MILO_NAME}’s tip">×</button><button class="hush" type="button" aria-label="Hush ${MILO_NAME}: stop speech bubbles" title="Hush ${MILO_NAME}">🔕</button><button class="t" type="button" aria-label="${esc(t.t)} Tap to open ${esc(t.b)}">${esc(t.t)}</button>`;bub.hidden=false;bt=setTimeout(hideBub,18000)}
+bub.addEventListener('click',e=>{const el=e.target;if(el.closest('.x')){hideBub()}else if(el.closest('.hush')){ls.set('vf_milo_mute','1');mlab();hideBub();toast(`${MILO_NAME} will stay quiet. You can turn bubbles back on in his chat.`)}else if(el.closest('.t')){hideBub();if(cur)location.hash=cur.h}});
+function tryBub(n){if(shown||muted())return;if($('#sheet').classList.contains('on')||!chat.hidden){if(n<14)setTimeout(()=>tryBub(n+1),3000);return}showBub(pick())}
+setTimeout(()=>tryBub(0),7000);
+// ---- chat: client-side matching over the guide
+const STOP=new Set('what whats when where how much many is are the a an do does you your have has any there me my to tell show about i can for of in at on please get it we our us and or with price prices cost rate rates fee fees time times hour hours open opens opening close closes closing'.split(' '));
+const stem=w=>{w=w.replace(/ll/g,'l');if(w.length>5&&w.endsWith('ing'))w=w.slice(0,-3);else if(w.length>3&&w.endsWith('s')&&!w.endsWith('ss'))w=w.slice(0,-1);return w};
+let NK;const nk=()=>NK||(NK=D.index.map(h=>h.k.replace(/ll/g,'l')));
+const short=(s,n)=>s.length>n?s.slice(0,n-1).trim()+'…':s;
+const VA=[['marlin','marlin'],['iru','iru'],['fen|pool bar','fen'],['vah|global dining|buffet','vah'],['spa|mandara','spa'],['dive|diving|water sports','dive'],['in[- ]?room|room service','inroom']];
+const vroute=v=>v.id=='spa'?'#/spa':v.id=='dive'?'#/dive':'#/venue/'+v.id;
+const DAYS=Object.keys(D.act);
+function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[- ]?fi/g,'wi-fi internet').trim();const A=(t,acts,extra)=>({t,acts:acts||[],extra:extra||''});
+ const Q=[['Compendium','#/compendium'],['Contacts','#/contacts']];
+ if(/^(hi|hello|hey|hola|good (morning|evening|afternoon))\b/.test(q))return A(`Hello! I’m ${MILO_NAME}, your guide. Ask me about opening hours, activities, menus, the spa or excursions – or tap a suggestion below.`);
+ if(/thank/.test(q))return A('You’re welcome! Ask me anything else about the guide.');
+ // opening hours of a named venue
+ if(/\b(open|opens|opening|close|closes|closing|hours?|time|times|when)\b/.test(q)){for(const [re,id] of VA){if(new RegExp('\\b('+re+')\\b').test(q)){const v=D.venues.concat(D.facilities).find(x=>x.id==id);if(v){const st=status(v.hours),nm=v.name.replace(/ \(.*/,'');return A(`${nm}: ${st.t}. All hours (Maldives time): ${v.hours.map(h=>`${h.l} ${fmt(h.a[0])} – ${fmt(h.a[1])}`).join(', ')}.`,[['Open '+nm.split(' ')[0],vroute(v)]].concat((v.menus||[]).slice(0,2).map(m=>[MENU[m].title.replace(/ \(.*/,''),'#/menu/'+m])).concat(v.mapno?[['Map','#/map/'+v.mapno]]:[]))}}}}
+ // what is open now
+ if(/(open now|what'?s open|currently open|open right now|open today|hungry|where .*eat)/.test(q)){const o=D.venues.concat(D.facilities).map(v=>({v,s:status(v.hours)})).filter(x=>x.s.s=='open');
+  return o.length?A(`Open right now (Maldives time): ${o.map(x=>x.v.name.replace(/ \(.*/,'')+' – '+x.s.t.replace(/^Open now · /,'')).join('; ')}.`,[['Restaurants & Bars','#/dining']]):A('Nothing listed in the guide is open at this moment. The full hours are on the Restaurants & Bars page.',[['Restaurants & Bars','#/dining']])}
+ // schedule
+ const dn=DAYS.find(d=>q.includes(d.toLowerCase()));
+ if(dn||/(today|tonight|tomorrow|what'?s on|what is on|activit|entertain|happening|schedule|programme)/.test(q)){let d=dn||mv().day,lab=d==mv().day?'Today':d;if(/tomorrow/.test(q)){d=DAYS[(DAYS.indexOf(mv().day)+1)%7];lab='Tomorrow ('+d+')'}
+  const L=(D.act[d]||[]).concat(D.ent[d]||[]).slice().sort((a,b)=>a[0].localeCompare(b[0]));
+  return A(L.length?`${lab} (${d}) at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><b>${esc(x[0].replace('–',' – '))}</b> ${esc(x[1])}${x[2]?' · '+esc(x[2]):''}</div>`).join(''))}
+ // spa voucher
+ if(/(voucher|discount|15 ?%|offer|complimentary|free)/.test(q)&&/(spa|mandara|massage|voucher|discount|offer)/.test(q)){const f=D.facilities[0];return A(`Mandara Spa offers 15% off spa treatments & wellness programmes for the length of your stay (at full published menu rates; can’t be combined with other promotions). There is also a complimentary 5-minute massage and ginger tea – present the voucher at the Spa. The spa is: ${status(f.hours).t}.`,[['Mandara Spa','#/spa'],['Call spa · ext. 618','tel:+9603336000,618']])}
+ // generic search over the 959-entry index
+ const price=/(price|cost|how much|rate|fee)/.test(q);
+ const words=q.replace(/[^a-z0-9$%\- ]/g,' ').split(/\s+/).filter(w=>w.length>1&&!STOP.has(w)),terms=[...new Set(words.map(stem))].filter(t=>t.length>1);
+ if(!terms.length)return A(`I’d love to help – try a few key words, like “snorkelling”, “Marlin hours” or “spa massages”.`);
+ const K=nk();let hits=[];D.index.forEach((h,i)=>{let sc=0;terms.forEach(t=>{if(K[i].includes(t))sc++});if(sc){const tt=h.t.toLowerCase().replace(/ll/g,'l'),ss=h.s.toLowerCase().replace(/ll/g,'l');terms.forEach(t=>{if(tt.includes(t))sc+=.6;if(ss.includes(t))sc+=.4});if(price&&/\$|usd/i.test(h.x))sc+=.8;hits.push({h,sc,full:K[i]&&terms.every(t=>K[i].includes(t))})}});
+ hits=hits.filter(x=>x.full);const part=false;
+ hits.sort((a,b)=>b.sc-a.sc);
+ if(!hits.length)return A(`Sorry – I couldn’t find that in this guide. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`,Q);
+ const top=hits.slice(0,3),acts=[];if(/\bspa\b|mandara/.test(q))acts.push(['Open Mandara Spa','#/spa']);acts.push([`See all ${hits.length} result${hits.length>1?'s':''}`,'#/search/'+encodeURIComponent(terms.join(' '))]);
+ return A(`${part?'I found close matches':'Here’s what the guide says'}${hits.length>1?` (${hits.length} entries)`:''}:`,acts,top.map(x=>`<a class="mhit" href="${x.h.h}"><b>${esc(short(x.h.t,70))}</b><span>${esc(x.h.s)} · ${esc(short(x.h.x,90))}</span></a>`).join(''))}
+const lg=$('#mlog');
+function say(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;return d}
+function ask(q){q=q.trim();if(!q)return;say('mu',esc(q));const r=answer(q);say('mb',esc(r.t)+r.extra+(r.acts.length?`<div class="mact">${r.acts.map((a,i)=>`<a class="${i?'alt':''}" href="${a[1]}">${esc(a[0])}</a>`).join('')}</div>`:''));}
+const CH=['What’s on today?','What’s open now?','What time is Marlin open?','Snorkelling price','Spa & 15% voucher','Spa massages','Wi-Fi'];
+$('#mch').innerHTML=CH.map(c=>`<button type="button">${esc(c)}</button>`).join('');
+$('#mch').addEventListener('click',e=>{const b=e.target.closest('button');if(b)ask(b.textContent)});
+$('#mform').addEventListener('submit',e=>{e.preventDefault();const i=$('#mq2');ask(i.value);i.value=''});
+lg.addEventListener('click',e=>{if(e.target.closest('a'))closeChat()});
+const mm=$('#mmute');function mlab(){mm.textContent=muted()?`Speech bubbles are off – turn them on`:`Speech bubbles are on – mute ${MILO_NAME}`}mlab();
+mm.onclick=()=>{ls.set('vf_milo_mute',muted()?'0':'1');mlab()};
+let greeted=false,lastFocus;
+function openChat(){hideBub();shown=true;lastFocus=document.activeElement;chat.hidden=false;document.body.classList.add('mchat-on');happyAv();if(!greeted){greeted=true;say('mb',`Hi, I’m ${MILO_NAME} 👋 your guide to Cinnamon Velifushi. Everything I say comes from this guide – ask me about hours, activities, menus, the spa or excursions.`)}chat.querySelector('.cl').focus()}
+function happyAv(){const a=$('#mav');a.classList.add('happy');setTimeout(()=>a.classList.remove('happy'),1500)}
+function closeChat(){if(chat.hidden)return;chat.hidden=true;document.body.classList.remove('mchat-on');if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}
+chat.querySelector('.cl').onclick=closeChat;chat.addEventListener('click',e=>{if(e.target===chat)closeChat()});
+addEventListener('keydown',e=>{if(e.key=='Escape'){closeChat();hideBub()}});
+root.addEventListener('click',()=>{happy();if(chat.hidden)openChat()});
+window.Milo={ask,openChat};
+})();
 </script></body></html>
