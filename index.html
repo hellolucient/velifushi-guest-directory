@@ -510,26 +510,17 @@ body.th-wine nav.bar{background:#f5f1e8;border-top-color:#ddd5c6}body.th-wine na
 .wn-it.wn-on .wn-nt{display:none}
 .wn-pr{flex:none;align-self:center;border-left:1px solid #c7bdae;padding:4px 0 4px 10px;font:500 12px/1.2 Jost,system-ui,sans-serif;letter-spacing:.05em;white-space:nowrap;color:#2b2420;min-height:34px;display:flex;align-items:center}
 .wn-pn{padding:2px 0 18px 0;margin-left:0}
-.wn-zm{all:unset;box-sizing:border-box;display:block;position:relative;margin:4px auto 14px;max-width:100%;cursor:zoom-in;border-radius:10px;-webkit-tap-highlight-color:transparent;width:fit-content}
-.wn-zm:focus-visible{outline:3px solid #5a1a2b;outline-offset:3px}
-.wn-zm img{display:block;height:auto;border-radius:10px;box-shadow:0 6px 20px rgba(50,30,15,.32),0 0 0 1px rgba(0,0,0,.06);background:#e8e1d3;margin:0 auto}
-.wn-zh{position:absolute;right:8px;bottom:8px;background:rgba(43,36,32,.78);color:#f5f1e8;font:500 10.5px/1 Jost,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:6px 9px;border-radius:999px}
+.wn-im img{display:block;height:auto;border-radius:10px;box-shadow:0 6px 20px rgba(50,30,15,.32),0 0 0 1px rgba(0,0,0,.06);background:#e8e1d3;margin:0 auto}
+.wn-im{display:block;position:relative;margin:4px auto 14px;max-width:100%;width:fit-content}
 .wn-full{margin:0 0 12px;font:400 14.5px/1.6 Jost,system-ui,sans-serif;color:#2f2823}
 .wn-dl{margin:0;display:grid;gap:9px}.wn-dl>div{display:grid;grid-template-columns:96px 1fr;gap:10px;padding-top:9px;border-top:1px solid #e3dccf}
 .wn-dl dt{font:500 11px/1.5 Jost,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#8b3a4f}
 .wn-dl dd{margin:0;font:400 14px/1.5 Jost,system-ui,sans-serif;color:#2f2823}
 .wn-empty{margin:30px 0;text-align:center;color:var(--mt)}
-.wn-lock{overflow:hidden}
-.wn-lb{position:fixed;inset:0;z-index:200;background:#120c0a;display:flex;flex-direction:column;touch-action:none}.wn-lb[hidden]{display:none}
-.wn-lbh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;color:#f5f1e8}.wn-lbh b{font:500 13px/1.3 Jost,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
-.wn-lbx{all:unset;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;text-align:center;line-height:44px;font-size:18px;cursor:pointer}.wn-lbx:focus-visible,.wn-lbb button:focus-visible{outline:3px solid #fff;outline-offset:2px}
-.wn-st{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;cursor:grab}.wn-st img{display:block;height:auto;border-radius:10px;transform-origin:center;will-change:transform;box-shadow:0 10px 40px rgba(0,0,0,.5)}
-.wn-lbb{display:flex;justify-content:center;gap:12px;padding:12px 14px calc(14px + env(safe-area-inset-bottom))}.wn-lbb button{all:unset;box-sizing:border-box;min-width:64px;height:44px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;text-align:center;line-height:44px;font:500 15px/44px Jost,system-ui,sans-serif;letter-spacing:.08em;cursor:pointer}
 .wn-bar.stuck .wn-row:first-child{margin-right:130px}
 .wn .wn-hd{margin:0}
 .wn .wn-pr{flex-direction:column;align-items:flex-start;justify-content:center;gap:6px}
 .wn .wn-pr:after{content:"+";font:300 20px/1 Jost,system-ui,sans-serif;color:#8b3a4f;margin-left:2px}.wn .wn-btn[aria-expanded=true] .wn-pr:after{content:"\2212"}
-.wn-zm.sm .wn-zh{font-size:0;padding:0;width:30px;height:30px;right:6px;bottom:6px}.wn-zm.sm .wn-zh:before{content:"\2315";font:500 17px/30px system-ui,sans-serif;display:block;text-align:center}
 
 </style></head><body>
 <header class="top" id="hd"></header>
@@ -718,7 +709,7 @@ const wnBand=p=>p<50?'a':p<100?'b':p<200?'c':'d';
 V.t_wine=(m,sec)=>{wnT='all';wnP='all';const W=D.wine;
  const row=w=>{const tw=Math.min(96,w.sw),ew=w.lr?Math.round(w.sw*1.5):Math.min(300,w.sw);
   return `<article class="wn-it" id="wn${w.id}" data-id="${w.id}" data-t="${w.t.join(' ')}" data-b="${wnBand(w.p)}"><h5 class="wn-hd"><button type="button" class="wn-btn" id="wb${w.id}" aria-expanded="false" aria-controls="wp${w.id}"><span class="wn-th"><img src="img/wine/t${w.id}.webp" alt="" width="${tw}" height="${Math.round(tw*.75)}" style="width:${tw}px" loading="lazy"></span><span class="wn-tx"><b class="wn-n">${esc(w.n)}</b><span class="wn-r">${esc(w.r)}</span><span class="wn-nt">${esc(w.note)}</span></span><span class="wn-pr">${thu(w.p)}</span></button></h5>
-  <div class="wn-pn" id="wp${w.id}" role="region" aria-labelledby="wb${w.id}" hidden><button type="button" class="wn-zm${ew<200?' sm':''}" data-wzoom="${w.id}" aria-label="Zoom in on the ${esc(w.n)} label"><img data-src="img/wine/${w.id}.webp" alt="The ${esc(w.n)} label" width="${ew}" height="${Math.round(ew*.75)}" style="width:${ew}px;max-width:100%"><span class="wn-zh" aria-hidden="true">⌕ Tap to zoom</span></button>
+  <div class="wn-pn" id="wp${w.id}" role="region" aria-labelledby="wb${w.id}" hidden><div class="wn-im"><img data-src="img/wine/${w.id}.webp" alt="The ${esc(w.n)} label" width="${ew}" height="${Math.round(ew*.75)}" style="width:${ew}px;max-width:100%"></div>
   <p class="wn-full">${esc(w.note)}</p><dl class="wn-dl"><div><dt>Pairs with</dt><dd>${esc(w.pair.replace(/\.$/,''))}</dd></div>${w.gr?`<div><dt>Grape</dt><dd>${esc(w.gr)}</dd></div>`:''}<div><dt>Region</dt><dd>${esc(w.r)}</dd></div></dl></div></article>`};
  const body=W.secs.map((t,si)=>{const its=W.items.filter(w=>w.s==si);if(!its.length)return '';let h='',cur;
   its.forEach(w=>{if(w.g!==cur){if(h)h+='</div>';cur=w.g;h+=`<div class="wn-grp" data-wgrp>${w.g?`<h4 class="wn-g">${esc(w.g)}</h4>`:''}`}h+=row(w)});h+='</div>';
@@ -741,31 +732,6 @@ function wnOpen(id,scroll){const a=document.getElementById('wn'+id);if(!a)return
   if(scroll!==false)setTimeout(()=>a.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}),30)}
  else wnClose(b)}
 function wnClose(b){const a=b.closest('.wn-it');b.setAttribute('aria-expanded','false');a.querySelector('.wn-pn').hidden=true;a.classList.remove('wn-on')}
-// label zoom (pinch / drag / double-tap / buttons); never magnified past ~2x its real source pixels
-let wnLB=null;
-function wnZoom(id,opener){const w=D.wine.items.find(x=>x.id==id);if(!w)return;
- if(!wnLB){wnLB=document.createElement('div');wnLB.className='wn-lb';wnLB.setAttribute('role','dialog');wnLB.setAttribute('aria-modal','true');wnLB.hidden=true;
-  wnLB.innerHTML='<div class="wn-lbh"><b id="wnlbt"></b><button type="button" class="wn-lbx" aria-label="Close label zoom">✕</button></div><div class="wn-st" id="wnst" tabindex="0" aria-label="Label image. Pinch, drag or use the buttons to zoom."><img id="wnim" alt="" draggable="false"></div><div class="wn-lbb"><button type="button" data-wz="-1" aria-label="Zoom out">−</button><button type="button" data-wz="0" aria-label="Reset zoom">Reset</button><button type="button" data-wz="1" aria-label="Zoom in">+</button></div>';document.body.appendChild(wnLB)}
- const st=wnLB.querySelector('#wnst'),im=wnLB.querySelector('#wnim');wnLB.setAttribute('aria-labelledby','wnlbt');wnLB.querySelector('#wnlbt').textContent=w.n;im.alt='The '+w.n+' label';im.src='img/wine/'+id+'.webp';
- const vw=innerWidth,wmax=Math.min(600,w.sw*2),base=Math.max(60,Math.min(vw-24,420,wmax)),maxS=Math.max(1,wmax/base);
- let s=1,tx=0,ty=0;im.style.width=base+'px';wnLB._o=opener;
- const clamp=()=>{const sw=base*s,sh=base*.75*s,r=st.getBoundingClientRect(),mx=Math.max(0,(sw-r.width)/2+24),my=Math.max(0,(sh-r.height)/2+24);tx=Math.max(-mx,Math.min(mx,tx));ty=Math.max(-my,Math.min(my,ty));if(s<=1.001){tx=0;ty=0}};
- const ap=()=>{clamp();im.style.transform=`translate(${tx}px,${ty}px) scale(${s})`};
- const setS=(ns,cx,cy)=>{ns=Math.max(1,Math.min(maxS,ns));if(cx!=null){const r=st.getBoundingClientRect(),px=cx-(r.left+r.width/2)-tx,py=cy-(r.top+r.height/2)-ty,k=ns/s;tx-=px*(k-1);ty-=py*(k-1)}s=ns;ap()};
- wnLB._z=d=>{if(d==0)setS(1);else setS(s*(d>0?1.35:1/1.35))};wnLB.hidden=false;document.documentElement.classList.add('wn-lock');ap();
- const P=new Map();let d0=0,s0=1,lt=0;
- st.onpointerdown=e=>{st.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);if(P.size==2){const q=[...P.values()];d0=Math.hypot(q[0][0]-q[1][0],q[0][1]-q[1][1]);s0=s}
-  if(P.size==1){const n=Date.now();if(n-lt<300){setS(s>1.05?1:Math.min(maxS,2),e.clientX,e.clientY);lt=0}else lt=n}};
- st.onpointermove=e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);
-  if(P.size==2){const q=[...P.values()];const dd=Math.hypot(q[0][0]-q[1][0],q[0][1]-q[1][1]);setS(s0*dd/d0,(q[0][0]+q[1][0])/2,(q[0][1]+q[1][1])/2)}
-  else if(s>1){tx+=e.clientX-o[0];ty+=e.clientY-o[1];ap()}};
- st.onpointerup=st.onpointercancel=e=>{P.delete(e.pointerId)};
- st.onwheel=e=>{e.preventDefault();setS(s*(e.deltaY<0?1.15:1/1.15),e.clientX,e.clientY)};
- wnLB.querySelector('.wn-lbx').focus()}
-function wnUnzoom(){if(!wnLB||wnLB.hidden)return;wnLB.hidden=true;document.documentElement.classList.remove('wn-lock');const o=wnLB._o;if(o&&document.contains(o))o.focus()}
-document.addEventListener('keydown',e=>{if(!wnLB||wnLB.hidden)return;if(e.key=='Escape')wnUnzoom();else if(e.key=='+'||e.key=='=')wnLB._z(1);else if(e.key=='-')wnLB._z(-1);else if(e.key=='Tab'){const f=[...wnLB.querySelectorAll('button')];const i=f.indexOf(document.activeElement);if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i==f.length-1){e.preventDefault();f[0].focus()}}});
-addEventListener('hashchange',()=>{if(wnLB&&!wnLB.hidden)wnUnzoom()});
-document.addEventListener('click',e=>{if(!wnLB||wnLB.hidden)return;const t=e.target;if(t.closest('.wn-lbx')||t===wnLB)wnUnzoom();else{const z=t.closest('[data-wz]');if(z)wnLB._z(+z.dataset.wz)}});
 // ---- interactions (delegated; no re-render so scroll position is kept)
 app.addEventListener('click',e=>{const t=e.target;let b;
  if(b=t.closest('[data-sgf]')){const f=b.dataset.sgf;document.querySelectorAll('[data-sgf]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));let shown=0;
@@ -775,7 +741,6 @@ app.addEventListener('click',e=>{const t=e.target;let b;
   const c=$('#sgc');if(c)c.textContent=f=='all'?'':`${shown} ${shown==1?'drink':'drinks'} with ${f}`;const e2=$('#sge');if(e2)e2.hidden=shown>0;return}
  if(b=t.closest('[data-wt]')){wnT=b.dataset.wt;document.querySelectorAll('[data-wt]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));wnFilter();wnTop();return}
  if(b=t.closest('[data-wp]')){wnP=b.dataset.wp;document.querySelectorAll('[data-wp]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));wnFilter();return}
- if(b=t.closest('[data-wzoom]')){wnZoom(b.dataset.wzoom,b);return}
  if(b=t.closest('.wn-btn')){wnOpen(+b.closest('.wn-it').dataset.id);return}
  if(b=t.closest('[data-ln]')){const o=$('#lnN');let n=+(o.dataset.n||3)+ +b.dataset.ln;n=Math.max(1,Math.min(30,n));o.dataset.n=n;o.textContent=n+(n==1?' night':' nights');lnUpd(n);return}
  if(b=t.closest('.ht-row')){const on=b.getAttribute('aria-pressed')!='true';b.setAttribute('aria-pressed',String(on));htUpd();return}
@@ -842,7 +807,7 @@ async function askNotify(){
  try{const reg=await navigator.serviceWorker.ready;await reg.showNotification('Today at Velifushi · '+day,o)}catch(e){try{new Notification('Today at Velifushi · '+day,o)}catch(_){toast('Notifications are allowed, but this device could not show the test.');return}}
  toast('Notifications on – a test reminder was shown.');closeSheet()}
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v13';
+window.APP_V='v14';
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=true;try{toast('Updating to the latest guide…')}catch(e){}setTimeout(()=>location.reload(),900)});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const chk=()=>r.update().catch(()=>{});chk();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,1800000)}).catch(()=>{})}
 </script><script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
 const MILO_NAME='Milo';
