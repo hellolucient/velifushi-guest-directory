@@ -37,6 +37,13 @@ main{padding:10px 14px 24px;max-width:760px;margin:0 auto}
 h2{font-size:18px;margin:22px 0 8px;color:var(--p)}
 h3{font-size:15px;margin:16px 0 6px;color:var(--p2);text-transform:uppercase;letter-spacing:.6px}
 .card{background:var(--card);border-radius:var(--r);padding:14px;margin:10px 0;box-shadow:0 2px 8px rgba(10,40,90,.07);border:1px solid #e3edf6}
+.bell{flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin:-3px -4px -3px 6px;padding:0;border:1.5px solid #e3c49a;border-radius:50%;background:#fff8ee;color:#9a521a;cursor:pointer;vertical-align:middle;-webkit-tap-highlight-color:transparent;transition:background .2s,color .2s,border-color .2s,transform .2s}
+.bell svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bell[aria-pressed=true]{background:#9a521a;border-color:#9a521a;color:#fff}.bell[aria-pressed=true] svg{fill:currentColor}
+.bell:active{transform:scale(.92)}.bell:focus-visible{outline:3px solid #3b2210;outline-offset:2px}
+.bell.rung svg{animation:bellring .6s ease}@keyframes bellring{0%,100%{transform:rotate(0)}20%{transform:rotate(16deg)}40%{transform:rotate(-14deg)}60%{transform:rotate(9deg)}80%{transform:rotate(-5deg)}}
+@media(prefers-reduced-motion:reduce){.bell.rung svg{animation:none}}
+.it .pr{display:flex;align-items:center}.it .pr small{white-space:nowrap}.it>div:first-child{min-width:0}.mb .ln{display:flex;align-items:center;justify-content:space-between;gap:8px}.mb .ln .bell{margin:0}
 .it{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e9eff6}
 .it:last-child{border:0}.it .n{font-weight:600}.it .d{color:var(--mu);font-size:13.5px;margin-top:2px}
 .pr{white-space:nowrap;font-weight:700;color:var(--p)}.pr small{font-weight:400;color:var(--mu)}
@@ -581,8 +588,47 @@ function pushState(perm){const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent
  if(perm=='granted'&&pushOn())return['Alerts are on. You’ll hear about resort news and offers.','<button class="btn alt" onclick="pushOff()">Turn off alerts</button>'];
  if(perm=='granted')return['Alerts are off on this device.','<button class="btn alt" onclick="askNotify()">🔔 Turn on alerts</button>'];
  return['Optional. Get resort news and offers on your phone.'+(isIOS&&!standalone?' On iPhone, add the app to your Home Screen first.':''),'<button class="btn alt" onclick="askNotify()">🔔 Allow phone alerts</button>']}
+/* ---- activity start alerts ---- */
+const AL_REG={},AL_WD=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const BELL_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 1.9H4.4z"/><path d="M10 21a2.2 2.2 0 0 0 4 0"/></svg>';
+function alLoad(){try{const o=JSON.parse(localStorage.getItem('vf_alerts')||'{}'),n=Date.now();let ch=0;for(const k in o)if(!o[k]||o[k].at<n-120000){delete o[k];ch=1}if(ch)localStorage.setItem('vf_alerts',JSON.stringify(o));return o}catch(e){return{}}}
+function alSave(o){try{localStorage.setItem('vf_alerts',JSON.stringify(o))}catch(e){}}
+function alText(x){/* "Beach Volleyball at the Game Zone" style line for the notification */
+ const clean=t=>t.replace(/\s*\([^)]*\)/g,'').trim(),nm=clean(String(x[1]||'')),pl=clean(String(x[2]||'').split(' · ')[0]);
+ if(/^\d\)/.test(nm)||/\d\)\s/.test(nm)){return nm.split(/\s*·?\s*\d\)\s*/).map(t=>t.trim()).filter(Boolean).join(' and ')}
+ if(nm.includes(' · '))return nm.split(' · ').map(t=>t.trim()).join(' and ');
+ return pl&&!/^pickup/i.test(pl)?nm+' at '+pl:nm+(pl?' ('+pl.charAt(0).toLowerCase()+pl.slice(1)+')':'')}
+function alFor(x,day){/* the next occurrence of this weekly slot (Maldives time, UTC+5); null if today's slot has already started */
+ const m=String(x[0]).match(/^(\d{1,2}):(\d{2})/),wi=AL_WD.indexOf(day);if(!m||wi<0)return null;
+ const nowMv=Date.now()+5*3600000,t=new Date(nowMv),cur=t.getUTCDay();let k=(wi-cur+7)%7;
+ const base=Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate()+k,+m[1],+m[2])-5*3600000;
+ if(base<=Date.now())return null;
+ const dt=new Date(base+5*3600000),p=n=>String(n).padStart(2,'0'),dstr=dt.getUTCFullYear()+'-'+p(dt.getUTCMonth()+1)+'-'+p(dt.getUTCDate()),slug=String(x[1]).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'x';
+ const time=String(x[0]).replace('–',' – ');
+ return{id:dstr+'T'+p(+m[1])+m[2]+'-'+slug,at:base,title:'Starting now',body:alText(x)+' · '+time,what:alText(x),day,time:m[1].padStart(2,'0')+':'+m[2],k}}
+function bellBtn(x,day){const a=alFor(x,day);if(!a)return'';AL_REG[a.id]=a;const on=!!alLoad()[a.id];
+ return `<button type="button" class="bell" data-al="${a.id}" aria-pressed="${on}" aria-label="Alert me when ${esc(a.what)} starts" title="Alert me when it starts" onclick="alToggle('${a.id}',this)">${BELL_SVG}</button>`}
+function alPaint(id){const on=!!alLoad()[id];document.querySelectorAll('.bell[data-al="'+id+'"]').forEach(b=>{b.setAttribute('aria-pressed',on);if(on){b.classList.add('rung');setTimeout(()=>b.classList.remove('rung'),700)}})}
+function alWhen(a){return (a.k==0?'today':a.k==1?'tomorrow':'on '+a.day)+' at '+(function(){const h=+a.time.slice(0,2),mm=a.time.slice(3);return (h%12||12)+':'+mm+(h<12?' am':' pm')})()}
+async function alSub(){const reg=await navigator.serviceWorker.ready;let s=await reg.pushManager.getSubscription();if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});return s}
+let alBusy=0;
+async function alToggle(id,btn){const a=AL_REG[id];if(!a||alBusy)return;const cur=alLoad();
+ if(cur[id]){delete cur[id];alSave(cur);alPaint(id);toast('Alert removed.');alSend('/alert/remove',{id}).then(ok=>{if(!ok){try{const q=JSON.parse(localStorage.getItem('vf_al_rm')||'[]');q.push(id);localStorage.setItem('vf_al_rm',JSON.stringify(q.slice(-40)))}catch(e){}}});return}
+ if(!PUSH_OK){toast(isIOS&&!standalone?'To get activity alerts on iPhone, add Milo to your Home Screen first (Share, then Add to Home Screen), then open Milo from its icon.':'Alerts aren’t available in this browser.',7000);return}
+ alBusy=1;try{let p=Notification.permission;if(p=='default')p=await Notification.requestPermission();
+  if(p=='denied'){toast('Notifications are blocked for Milo. You can allow them in your phone’s settings to get activity alerts.',6500);return}
+  if(p!='granted')return;
+  let s;try{s=await alSub()}catch(e){toast('We couldn’t set that alert just now. Please try again.');return}
+  const ok=await alSend('/alert',{id,at:a.at,title:a.title,body:a.body},s);
+  if(!ok){toast('We couldn’t set that alert just now. Please check your connection and try again.');return}
+  cur[id]={at:a.at};alSave(cur);alPaint(id);ev('alert');toast('Alert set for '+alWhen(a)+'. We’ll let you know when it starts.',4800)}finally{alBusy=0}}
+async function alSend(path,body,sub){try{if(!sub){if(!PUSH_OK)return false;const reg=await navigator.serviceWorker.ready;sub=await reg.pushManager.getSubscription();if(!sub)return true}/* no subscription: nothing stored server-side */
+ const p=path=='/alert'?{subscription:sub.toJSON(),...body}:{endpoint:sub.endpoint,...body};
+ const c=new AbortController(),tm=setTimeout(()=>c.abort(),10000);const r=await fetch(PUSH_API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p),signal:c.signal});clearTimeout(tm);return r.ok}catch(e){return false}}
+async function alResync(){try{if(!PUSH_OK||Notification.permission!='granted')return;const q=JSON.parse(localStorage.getItem('vf_al_rm')||'[]');
+ for(const id of q.slice()){if(await alSend('/alert/remove',{id})){q.splice(q.indexOf(id),1)}}localStorage.setItem('vf_al_rm',JSON.stringify(q))}catch(e){}}
 function actToday(){const d=mv().day;const a=D.act[d]||[],e=D.ent[d]||[];
- return `<div class="card"><b>${d}</b>${a.concat(e).map(x=>`<div class="it"><div><div class="n">${esc(x[1])}</div><div class="d">${esc(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small></div></div>`).join('')}<a class="btn alt" href="#/activities">Full week</a></div>`}
+ return `<div class="card"><b>${d}</b>${a.concat(e).map(x=>`<div class="it"><div><div class="n">${esc(x[1])}</div><div class="d">${esc(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small>${bellBtn(x,d)}</div></div>`).join('')}<a class="btn alt" href="#/activities">Full week</a></div>`}
 V.dining=()=>`<h2>Restaurants & Bars</h2>`+D.venues.map(v=>`<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b>${v.emoji} ${esc(v.name)}</b></div><div class="d" style="color:var(--mu);font-size:13px">${esc(v.kind)}</div><p style="font-size:14px">${esc(v.desc)}</p>${hrsHtml(v.hours)}<div style="margin:8px 0">${badge(v.hours)}</div>${v.menus.map(m=>`<a class="btn alt" href="#/menu/${m}">${esc(MENU[m].title.replace(/ \(.*/,''))}</a>`).join('')}${v.mapno?`<a class="btn alt" href="#/map/${v.mapno}">📍 Map</a>`:''}</div>`).join('')+`<div class="note">${esc(D.barnote)}</div>`;
 V.venue=id=>{const v=D.venues.find(x=>x.id==id)||D.facilities.find(x=>x.id==id);if(!v)return V.dining();return `<h2>${v.emoji} ${esc(v.name)}</h2><div class="card">${v.desc?`<p>${esc(v.desc)}</p>`:''}${hrsHtml(v.hours)}<div style="margin:8px 0">${badge(v.hours)}</div>${v.note?`<div class="note">${esc(v.note)}</div>`:''}${(v.menus||[]).map(m=>`<a class="btn" href="#/menu/${m}">${esc(MENU[m].title)}</a>`).join('')}${v.mapno?`<a class="btn alt" href="#/map/${v.mapno}">📍 Map</a>`:''}</div>`};
 V.menus=()=>{const cats=Object.keys(CAT).filter(c=>D.menus.some(m=>m.cat==c));return `<h2>Menus</h2>`+cats.map(c=>`<h3>${CAT[c]}</h3>`+D.menus.filter(m=>m.cat==c).map(m=>`<a class="card hit" href="#/menu/${m.id}" style="display:block"><b>${esc(m.title)}</b><span>${esc(m.venue)}${m.hours?' · '+esc(m.hours):''} · ${m.secs.reduce((a,s)=>a+s.items.length,0)} items</span></a>`).join('')).join('')};
@@ -628,7 +674,7 @@ V.spa=()=>{SXF.cat='all';SXF.dur='any';const X=D.spax;
   <section class="sx-basics" id="sxBasics"><h2>Spa Basics</h2>${X.basics.map(q=>`<details class="sx-q"><summary>${esc(q[0])}</summary><div class="b">${esc(q[1])}</div></details>`).join('')}</section></div>
  <footer class="sx-end"><div class="a"><b>${esc(X.name)}</b><br>${X.addr.map(esc).join('<br>')}<br>Tel : <a href="tel:${X.telh}">${esc(X.tel)}</a><br>Fax : ${esc(X.fax)}<br>E-mail : <a href="mailto:${X.mail}">${esc(X.mail)}</a><br>${esc(X.web)}</div><img class="co" src="img/chv-mandara.png" width="450" height="260" alt="A Mandara Spa Company" loading="lazy"></footer>
  </div>`};
-V.activities=()=>{const t=mv().day,ks=Object.keys(D.act),i=Math.max(0,ks.indexOf(t)),ord=ks.slice(i).concat(ks.slice(0,i));return `<h2>Weekly Activities & Entertainment</h2><p class="actnote">Starting from today, ${t}, and running through the week.</p>`+ord.map(d=>`<div class="card day ${d==t?'today':''}"><b>${d}${d==t?' <span class="tdtag">Today</span>':''}</b>${(D.act[d]).concat(D.ent[d]||[]).map(x=>`<div class="it"><div><div class="n">${esc(x[1])}</div><div class="d">${esc(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small></div></div>`).join('')}</div>`).join('')};
+V.activities=()=>{const t=mv().day,ks=Object.keys(D.act),i=Math.max(0,ks.indexOf(t)),ord=ks.slice(i).concat(ks.slice(0,i));return `<h2>Weekly Activities & Entertainment</h2><p class="actnote">Starting from today, ${t}, and running through the week.</p>`+ord.map(d=>`<div class="card day ${d==t?'today':''}"><b>${d}${d==t?' <span class="tdtag">Today</span>':''}</b>${(D.act[d]).concat(D.ent[d]||[]).map(x=>`<div class="it"><div><div class="n">${esc(x[1])}</div><div class="d">${esc(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small>${bellBtn(x,d)}</div></div>`).join('')}</div>`).join('')};
 V.excursions=()=>`<h2>Excursions</h2>`+D.exc.map(e=>`<div class="card"><div class="hero" style="margin-top:0"><img loading="lazy" src="${e.img}" alt="${esc(e.n)}"></div><b>${esc(e.n)}</b><p style="font-size:14px">${esc(e.d)}</p><div class="pillrow"><span class="badge open">${esc(e.p)}</span>${e.min?`<span class="badge soon">${esc(e.min)}</span>`:''}<span class="badge closed" style="background:#e8e2f3;color:var(--p)">${esc(e.by)}</span></div></div>`).join('')+`<div class="note">Book through Reception / Guest Relations.</div>`;
 V.dive=()=>{const q=(window.__dq||'').toLowerCase();return `<h2>🤿 Dive & Water Sports</h2><div class="card">${hrsHtml(D.facilities[1].hours)}<div style="margin:8px 0">${badge(D.facilities[1].hours)}</div><div class="note">${esc(D.facilities[1].note)} Rates valid 1 Sept 2026 – 30 Apr 2027. Prices below are the “TOTAL” column of the rate card; the card’s footer says prices include service charge and tax although the TOTAL column adds them to the base price – confirm with the Dive Centre.</div><a class="btn alt" href="#/map/2">📍 Map</a></div>
  <input class="mi" placeholder="Filter (e.g. snorkel, jetski, course)…" value="${esc(window.__dq||'')}" oninput="window.__dq=this.value;rerenderDive(this)">
@@ -799,7 +845,7 @@ const standalone=matchMedia('(display-mode: standalone)').matches||navigator.sta
 window.__inst=standalone;let deferred=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if($('#sheet').classList.contains('on'))renderSheet()});
 addEventListener('appinstalled',()=>{window.__inst=true;closeSheet();toast('Installed – open Velifushi from your Home Screen');render()});
-function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',4200)}
+function toast(t,ms){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',ms||4200)}
 function renderSheet(){let h='<h3>Add Velifushi to your Home Screen</h3><div style="color:var(--mu);font-size:14px">Works like an app, full screen, and the menus keep working offline once opened.</div>';
  if(standalone){h+='<div class="warn">✅ You are already using the installed app.</div>'}
  else if(isIOS){
@@ -821,7 +867,7 @@ async function pushEnable(){const reg=await navigator.serviceWorker.ready;let s=
  if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});
  const r=await fetch(PUSH_API+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:s.toJSON()})});if(!r.ok)throw new Error('subscribe');
  try{localStorage.setItem('vf_push','1');localStorage.removeItem('vf_push_off')}catch(e){}return s}
-async function pushOff(){try{const reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s){fetch(PUSH_API+'/unsubscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:s.endpoint})}).catch(()=>{});await s.unsubscribe()}}catch(e){}
+async function pushOff(){try{const reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s){fetch(PUSH_API+'/unsubscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:s.endpoint})}).catch(()=>{});if(!Object.keys(alLoad()).length)await s.unsubscribe()}}catch(e){}
  try{localStorage.setItem('vf_push_off','1');localStorage.removeItem('vf_push')}catch(e){}toast('Alerts are off.');if(/notifications/.test(location.hash))render()}
 async function askNotify(){
  if(!PUSH_OK){toast(isIOS&&!standalone?'On iPhone, add the app to your Home Screen first, then open it from the icon and try again.':'This browser does not support notifications.');return}
@@ -833,16 +879,15 @@ async function askNotify(){
  toast('Alerts are on.');closeSheet();if(/notifications/.test(location.hash))render()}
 // keep an existing alert subscription registered; fetch announcements; react to the service worker
 try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_push_off')!='1')setTimeout(()=>pushEnable().catch(()=>{}),2500)}catch(e){}
-setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
+setTimeout(alResync,3000);setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();if(typeof m.id=='string'&&/^a[a-z0-9]{3,30}$/.test(m.id))evTap(m.id);location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v20';
+window.APP_V='v21';
 setTimeout(cntFetch,500);setInterval(()=>{if(!document.hidden)cntFetch()},300000);
 try{const lo=+localStorage.getItem('vf_open')||0;if(Date.now()-lo>30*60000){ev('open');localStorage.setItem('vf_open',String(Date.now()))}if(standalone&&!localStorage.getItem('vf_inst')){ev('inst');localStorage.setItem('vf_inst','1')}}catch(e){}
 addEventListener('pagehide',()=>evFlush(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)evFlush(true);else cntFetch()});
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=true;try{toast('Updating to the latest guide…')}catch(e){}setTimeout(()=>location.reload(),900)});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const chk=()=>r.update().catch(()=>{});chk();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,1800000)}).catch(()=>{})}
-</script><a id="stf" href="https://milo.cinnamonvelifushi.workers.dev/admin" aria-label="Staff" title="Staff" style="position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:40;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,248,236,.55);color:rgba(120,70,30,.55);font:600 15px/1 system-ui;text-decoration:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)">&#8943;</a>
-<script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
+</script><script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
 const MILO_NAME='Milo';
 (function(){
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -875,7 +920,7 @@ function miloSvg(p){return `<svg viewBox="-2 0 124 124" aria-hidden="true" focus
 const root=document.createElement('button');root.id='milo';root.type='button';root.setAttribute('aria-label',`Ask ${MILO_NAME}`);
 root.innerHTML=`<span class="milo-art"><span class="m-wrap"><span class="m-tk">${miloSvg('mm')}</span></span></span>`;document.body.appendChild(root);window.__mattach=()=>{};
 const bub=document.createElement('div');bub.id='mbub';bub.hidden=true;bub.setAttribute('role','status');bub.setAttribute('aria-live','polite');document.body.appendChild(bub);
-const chat=document.createElement('div');chat.id='mchat';chat.hidden=true;chat.innerHTML=`<div class="pn" role="dialog" aria-modal="true" aria-label="Chat with ${MILO_NAME}"><div class="hd"><span class="av milo-art" id="mav">${miloSvg('ma')}</span><div class="tx"><b>${MILO_NAME}</b><small>Your guide to Cinnamon Velifushi</small></div><button class="cl" type="button" aria-label="Close ${MILO_NAME}">×</button></div><div class="nt">I’m ${MILO_NAME}, a guide – not an AI. I look things up in this app’s guide, right on your phone; nothing is sent anywhere.</div><div class="lg" id="mlog" aria-live="polite"></div><div class="ch" id="mch"></div><form id="mform"><input id="mq2" type="text" autocomplete="off" enterkeyhint="send" placeholder="Ask ${MILO_NAME} anything…" aria-label="Your question for ${MILO_NAME}"><button type="submit">Ask</button></form><div class="ft"><button type="button" id="mmute"></button><button type="button" id="mstill"></button><div class="ver">Guide version ${window.APP_V||''}</div></div></div>`;document.body.appendChild(chat);
+const chat=document.createElement('div');chat.id='mchat';chat.hidden=true;chat.innerHTML=`<div class="pn" role="dialog" aria-modal="true" aria-label="Chat with ${MILO_NAME}"><div class="hd"><span class="av milo-art" id="mav">${miloSvg('ma')}</span><div class="tx"><b>${MILO_NAME}</b><small>Your guide to Cinnamon Velifushi</small></div><button class="cl" type="button" aria-label="Close ${MILO_NAME}">×</button></div><div class="nt">I’m ${MILO_NAME}, a guide – not an AI. I look things up in this app’s guide, right on your phone; what you ask stays on your phone.</div><div class="lg" id="mlog" aria-live="polite"></div><div class="ch" id="mch"></div><form id="mform"><input id="mq2" type="text" autocomplete="off" enterkeyhint="send" placeholder="Ask ${MILO_NAME} anything…" aria-label="Your question for ${MILO_NAME}"><button type="submit">Ask</button></form><div class="ft"><button type="button" id="mmute"></button><button type="button" id="mstill"></button><div class="ver">Guide version ${window.APP_V||''}</div></div></div>`;document.body.appendChild(chat);
 const roots=[root,$('#mav')];
 function setCls(c,on){roots.forEach(r=>r.classList.toggle(c,!!on))}
 // ---- state: sleepy after 22:00 (to 06:00), goggles on island / dive pages
@@ -1013,7 +1058,7 @@ function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[
  const dn=DAYS.find(d=>q.includes(d.toLowerCase()));
  if(dn||/(today|tonight|tomorrow|what'?s on|what is on|activit|entertain|happening|schedule|programme)/.test(q)){let d=dn||mv().day,lab=d==mv().day?'Today':d;if(/tomorrow/.test(q)){d=DAYS[(DAYS.indexOf(mv().day)+1)%7];lab='Tomorrow ('+d+')'}
   const L=(D.act[d]||[]).concat(D.ent[d]||[]).slice().sort((a,b)=>a[0].localeCompare(b[0]));
-  return A(L.length?`${lab} (${d}) at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><b>${esc(x[0].replace('–',' – '))}</b> ${esc(x[1])}${x[2]?' · '+esc(x[2]):''}</div>`).join(''))}
+  return A(L.length?`${lab} (${d}) at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><span><b>${esc(x[0].replace('–',' – '))}</b> ${esc(x[1])}${x[2]?' · '+esc(x[2]):''}</span>${bellBtn(x,d)}</div>`).join(''))}
  // spa voucher
  if(/(voucher|discount|15 ?%|offer|complimentary|free)/.test(q)&&/(spa|mandara|massage|voucher|discount|offer)/.test(q)){const f=D.facilities[0];return A(`Mandara Spa offers 15% off spa treatments & wellness programmes for the length of your stay (at full published menu rates; can’t be combined with other promotions). There is also a complimentary 5-minute massage and ginger tea – present the voucher at the Spa. The spa is: ${status(f.hours).t}.`,[['Mandara Spa','#/spa'],['Call spa · ext. 618','tel:+9603336000,618']])}
  // generic search over the 959-entry index
