@@ -834,9 +834,10 @@ try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_pus
 setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v17';
+window.APP_V='v18';
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=true;try{toast('Updating to the latest guide…')}catch(e){}setTimeout(()=>location.reload(),900)});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const chk=()=>r.update().catch(()=>{});chk();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,1800000)}).catch(()=>{})}
-</script><script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
+</script><a id="stf" href="https://milo.cinnamonvelifushi.workers.dev/admin" aria-label="Staff" title="Staff" style="position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:40;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,248,236,.55);color:rgba(120,70,30,.55);font:600 15px/1 system-ui;text-decoration:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)">&#8943;</a>
+<script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
 const MILO_NAME='Milo';
 (function(){
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
