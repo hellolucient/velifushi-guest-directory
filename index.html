@@ -229,6 +229,10 @@ body.home main{padding:0;max-width:none;margin:0}
 .mb{align-self:flex-start;background:#fff;border:1px solid #efd2ab;color:#3b2210;border-bottom-left-radius:4px}
 .mu{align-self:flex-end;background:#9a521a;color:#fff;border-bottom-right-radius:4px}
 .mb .ln{margin-top:3px}
+.ihl{outline:3px solid #e8932b;outline-offset:3px;border-radius:12px;animation:ihlp 1.1s ease-in-out 3}
+@keyframes ihlp{0%,100%{box-shadow:0 0 0 0 rgba(232,147,43,0)}50%{box-shadow:0 0 0 9px rgba(232,147,43,.32)}}
+@media (prefers-reduced-motion:reduce){.ihl{animation:none;box-shadow:0 0 0 7px rgba(232,147,43,.3)}}
+.ln a.lnn{color:inherit;text-decoration:none;border-bottom:1px dotted #9a521a}
 .mact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .mact a{background:#9a521a;color:#fff;border-radius:16px;padding:7px 12px;font-size:13px;font-weight:600;text-decoration:none}
 .mact a.alt{background:#fbe3c0;color:#6b3a12}
@@ -759,9 +763,9 @@ V.spa=()=>{SXF.cat='all';SXF.dur='any';const f=D.facilities[0],X=D.spax;
   <div class="sx-gal" aria-label="Photos from Mandara Spa">${X.gallery.map(g=>`<img src="img/${g}" alt="" loading="lazy" decoding="async">`).join('')}</div></div>
  <footer class="sx-end"><img src="img/spax-logo.webp" width="330" height="160" alt="Mandara Spa" loading="lazy"><div class="a">Cinnamon Velifushi Maldives<br>${esc(X.addr)}<br>T. <a href="tel:+9603336000,618">${esc(X.tel)}</a><br>E. <a href="mailto:cinnamonvelifushi@mandaraspa.com">${esc(X.mail)}</a></div><div class="u">${esc(X.web)}</div></footer>
  </div>`};
-V.activities=()=>{const t=mv().day,ks=Object.keys(D.act),i=Math.max(0,ks.indexOf(t)),ord=ks.slice(i).concat(ks.slice(0,i));return PH('dv-sports','Weekly Activities &amp; Entertainment','sm','50% 60%')+`<p class="actnote">Starting from today, ${t}, and running through the week.</p>`+ord.map(d=>`<div class="card day ${d==t?'today':''}"><b>${d}${d==t?' <span class="tdtag">Today</span>':''}</b>${(D.act[d]).concat(D.ent[d]||[]).map(x=>`<div class="it"><div><div class="n">${lk(x[1])}</div><div class="d">${lk(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small>${bellBtn(x,d)}</div></div>`).join('')}</div>`).join('')};
+V.activities=()=>{const t=mv().day,ks=Object.keys(D.act),i=Math.max(0,ks.indexOf(t)),ord=ks.slice(i).concat(ks.slice(0,i));return PH('dv-sports','Weekly Activities &amp; Entertainment','sm','50% 60%')+`<p class="actnote">Starting from today, ${t}, and running through the week.</p>`+ord.map(d=>`<div class="card day ${d==t?'today':''}"><b>${d}${d==t?' <span class="tdtag">Today</span>':''}</b>${(D.act[d]).concat(D.ent[d]||[]).map(x=>`<div class="it" data-i="${ACTID(d,x[0],x[1])}"><div><div class="n">${lk(x[1])}</div><div class="d">${lk(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small>${bellBtn(x,d)}</div></div>`).join('')}</div>`).join('')};
 V.excursions=()=>{const EX={'Big Game Fishing':'ex-fish','Dolphin Watching':'ex-dolphin','Local Village Tour':'ex-village','Sandbank Experience':'ex-sand','Sunset Cruise':'ex-cruise','Sunset Fishing':'ex-sunfish','Thinadhoo Island':'ex-thin','Behind the Island':'ex-engineer'};
- return PH('isl-excursions','Excursions')+D.exc.map(e=>`<div class="card vc"><div class="vh"><img src="img/${EX[e.n]||'isl-excursions'}.webp" alt="" width="900" height="473" decoding="async"><div class="vt"><b>${esc(e.n)}</b></div></div><div class="vb"><p style="font-size:14px">${esc(e.d)}</p><div class="pillrow"><span class="badge open">${esc(e.p)}</span>${e.min?`<span class="badge soon">${esc(e.min)}</span>`:''}<span class="badge closed" style="background:#e8e2f3;color:var(--p)">${esc(e.by)}</span></div>${e.img?`<details class="fly"><summary>View the flyer</summary><img loading="lazy" src="${e.img}" alt="${esc(e.n)} flyer"></details>`:''}</div></div>`).join('')+`<div class="note">Book through Reception / Guest Relations.</div>`};
+ return PH('isl-excursions','Excursions')+D.exc.map(e=>`<div class="card vc" data-i="${SLUG(e.n)}"><div class="vh"><img src="img/${EX[e.n]||'isl-excursions'}.webp" alt="" width="900" height="473" decoding="async"><div class="vt"><b>${esc(e.n)}</b></div></div><div class="vb"><p style="font-size:14px">${esc(e.d)}</p><div class="pillrow"><span class="badge open">${esc(e.p)}</span>${e.min?`<span class="badge soon">${esc(e.min)}</span>`:''}<span class="badge closed" style="background:#e8e2f3;color:var(--p)">${esc(e.by)}</span></div>${e.img?`<details class="fly"><summary>View the flyer</summary><img loading="lazy" src="${e.img}" alt="${esc(e.n)} flyer"></details>`:''}</div></div>`).join('')+`<div class="note">Book through Reception / Guest Relations.</div>`};
 V.dive=()=>{const q=(window.__dq||'').toLowerCase();return PH('dv-diving','Dive &amp; Water Sports','','50% 55%')+`<div class="card">${hrsHtml(D.facilities[1].hours)}<div style="margin:8px 0">${badge(D.facilities[1].hours)}</div><div class="note">${esc(D.facilities[1].note)} Rates valid 1 Sept 2026 – 30 Apr 2027. Prices below are the “TOTAL” column of the rate card; the card’s footer says prices include service charge and tax although the TOTAL column adds them to the base price – confirm with the Dive Centre.</div><a class="btn alt" href="#/map/2">📍 Map</a></div>
  <input class="mi" placeholder="Filter (e.g. snorkel, jetski, course)…" value="${esc(window.__dq||'')}" oninput="window.__dq=this.value;rerenderDive(this)">
  <div id="dv">${diveBody(q)}</div>`};
@@ -909,12 +913,37 @@ async function cntFetch(){try{const c=new AbortController(),tm=setTimeout(()=>c.
 // anonymous counting: a random id this device makes for itself, page names and counts only (no name, phone, IP or location is sent)
 const EVQ=[];let evT=0,_lp='';
 function evId(){let d='';try{d=localStorage.getItem('vf_did')||''}catch(e){}if(!/^[a-f0-9]{32}$/.test(d)){d=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join('');try{localStorage.setItem('vf_did',d)}catch(e){}}return d}
-function evFlush(beacon){if(!EVQ.length)return;const body=JSON.stringify({d:evId(),e:EVQ.splice(0,25)});try{if(beacon&&navigator.sendBeacon)navigator.sendBeacon(PUSH_API+'/e',new Blob([body],{type:'text/plain'}));else fetch(PUSH_API+'/e',{method:'POST',body,headers:{'Content-Type':'text/plain'},keepalive:true}).catch(()=>{})}catch(e){}}
+function evFlush(beacon){if(!EVQ.length)return;const body=JSON.stringify({d:evId(),e:EVQ.splice(0,25),w:navigator.webdriver?1:0});try{if(beacon&&navigator.sendBeacon)navigator.sendBeacon(PUSH_API+'/e',new Blob([body],{type:'text/plain'}));else fetch(PUSH_API+'/e',{method:'POST',body,headers:{'Content-Type':'text/plain'},keepalive:true}).catch(()=>{})}catch(e){}}
 function ev(k,x){try{EVQ.push(x==null?[k]:[k,x]);clearTimeout(evT);evT=setTimeout(()=>evFlush(),1500)}catch(e){}}
 function evPage(r){r=r||'home';if(r===_lp)return;_lp=r;ev('page',r)}
 function evTap(id){ev('at',id)}
 function evViews(){try{const seen=JSON.parse(localStorage.getItem('vf_av')||'[]'),nw=annLive().map(a=>a.id).filter(i=>seen.indexOf(i)<0);if(nw.length){nw.forEach(i=>ev('av',i));localStorage.setItem('vf_av',JSON.stringify(seen.concat(nw).slice(-200)))}}catch(e){}}
-function render(){const h=location.hash.replace(/^#\/?/,'');const [r,a,b]=h.split('/').map(decodeURIComponent);let html;
+function SLUG(s){return String(s==null?'':s).toLowerCase().replace(/&amp;|&/g,' and ').replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48).replace(/-+$/,'')}
+function ACTID(day,time,raw){return String(day).slice(0,3).toLowerCase()+'-'+String(time).split(/[–-]/)[0].replace(/\D/g,'').padStart(4,'0')+'-'+SLUG(raw).slice(0,30)}
+// Deep links: #/page?i=<item> scrolls to that item and flashes it. Items carry data-i (activities, excursions) or are found by their title text (menus, spa, dive, weddings, contacts...). Pages render at once, but we keep looking for ~4s in case content arrives late.
+const HLX={'laundry':{'laundry-package-3-nights-stay':'.ln-card[data-t="0"]','laundry-package-4-5-nights-stay':'.ln-card[data-t="1"]','laundry-package-6-7-nights-stay':'.ln-card[data-t="2"]','laundry-package-8-nights-stay-or-more':'.ln-card[data-t="3"]','during-your-stay-unlimited-laundry':'.ln-calc','notes':'.ln-notes'},'menu/mule':{'cinnamon-mule':'.mu-title'}};
+function hlText(app,slug){let best=null,bl=1e9,pre=null,pl=1e9;const all=app.querySelectorAll('b,strong,h2,h3,h4,h5,summary,a,span,div,p,li,td,dt,dd,label,button');
+ for(let i=0;i<all.length;i++){const e=all[i],t=(e.textContent||'').replace(/\s+/g,' ').trim();if(!t||t.length>400)continue;const x=SLUG(t);
+  if(x===slug){if(t.length<=bl){bl=t.length;best=e}}else if(x.length>slug.length&&x.startsWith(slug)&&t.length<=slug.length+30){if(t.length<=pl){pl=t.length;pre=e}}}
+ const e=best||pre;if(!e)return null;let n=e;for(let k=0;k<7;k++){const p=n.parentElement;if(!p||p===app)break;if([...p.children].some(c=>c!==n&&c.tagName===n.tagName&&c.className===n.className))break;n=p}return n}
+function hlFind(slug){const app=document.getElementById('app');if(!app||!slug)return null;let el=null;
+ try{el=app.querySelector('[data-i="'+slug.replace(/[^a-z0-9-]/g,'')+'"]')}catch(e){}
+ if(!el){const m=slug.match(/^(sun|mon|tue|wed|thu|fri|sat)-(\d{4})-/);if(m){const c=app.querySelectorAll('[data-i^="'+m[1]+'-'+m[2]+'-"]');if(c.length)el=c[0]}}
+ if(!el){const rt=location.hash.replace(/^#\/?/,'').split('?')[0],x=HLX[rt]&&HLX[rt][slug];if(x)el=app.querySelector(x)}
+ if(!el)el=hlText(app,slug);
+ // a long or odd title (extra words, other-language text): fall back to its first words
+ if(!el){const w=slug.split('-');for(let k=w.length-1;k>=2&&!el&&k>=Math.ceil(w.length/2);k--)el=hlText(app,w.slice(0,k).join('-'))}
+ return el}
+function hlGo(el){const r=el.getBoundingClientRect(),vh=innerHeight,y=r.height>vh*.7?scrollY+r.top-70:scrollY+r.top-(vh-r.height)/2;scrollTo({top:Math.max(0,y),behavior:'instant'})}
+function hlItem(slug,n,tk){n=n||0;if(!tk)tk=window.__hlTok=Math.random();if(tk!==window.__hlTok)return;let el=null;try{el=hlFind(slug)}catch(e){}
+ if(!el){if(n<26)setTimeout(()=>hlItem(slug,n+1,tk),160);else window.__hlMiss=slug;return}
+ window.__hlMiss='';window.__hlEl=el;let d=el.closest('details');while(d){d.open=true;d=d.parentElement&&d.parentElement.closest('details')}
+ hlGo(el);document.querySelectorAll('.ihl').forEach(x=>x.classList.remove('ihl'));void el.offsetWidth;el.classList.add('ihl');
+ setTimeout(()=>{if(tk===window.__hlTok&&el.isConnected){const r=el.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)hlGo(el)}},650);
+ setTimeout(()=>el.classList.remove('ihl'),4200)}
+window.vfHL=hlItem;
+function render(){let h=location.hash.replace(/^#\/?/,''),it='';const qi=h.indexOf('?');if(qi>=0&&!/^(search|find)\//.test(h)){try{it=new URLSearchParams(h.slice(qi+1)).get('i')||''}catch(e){}h=h.slice(0,qi)}
+ const [r,a,b]=h.split('/').map(decodeURIComponent);let html;
  if(r=='search'||r=='find'){const q=a||'';history.replaceState(null,'','#/');setTimeout(()=>{if(window.Milo){Milo.openChat();if(q)Milo.ask(q)}},120);return render()}
  
  if(r=='menu')html=V.menu(a,null,b);else if(r=='venue')html=V.venue(a);else if(r=='map')html=V.map(a);else html=(V[r]||V.home)();
@@ -923,7 +952,7 @@ function render(){const h=location.hash.replace(/^#\/?/,'');const [r,a,b]=h.spli
  $('#hd').innerHTML=`<div class="row">${home?'':`<button class="back pill" onclick="location.hash='#/'" aria-label="Back to the dial">${IC.dial}Dial</button>`}<div><h1>Cinnamon Velifushi</h1><div class="sub">Guest Directory · Vaavu Atoll, Maldives</div></div></div>${home?'':`<div class="mband"><div class="clock" style="margin-top:0">🕒 ${mv().txt} (Maldives time)</div></div>`}`;
  $('#nav').innerHTML=[['','◉','Dial'],['dining','🍽️','Dine'],['spa','💆','Spa'],['activities','🎯','Do'],['contacts','📞','Call']].map(n=>`<a href="#/${n[0]}" class="${(r||'')==n[0]?'on':''}"><span>${n[1]}</span>${n[2]}</a>`).join('');
  if(r=='map'&&a){const p=document.querySelector('.pin.hl'),ms=$('#ms');if(p&&ms)ms.scrollLeft=p.offsetLeft-ms.clientWidth/2}
- if(!(r=='menu'&&document.activeElement.id=='mq'))scrollTo(0,0);if(window.__mattach)window.__mattach();ntBadge();evPage(r);if(r=='notifications')evViews()}
+ if(!(r=='menu'&&document.activeElement.id=='mq'))scrollTo(0,0);window.__hlTok=0;if(it){const k=location.hash;if(window.__hlHash!==k){window.__hlHash=k;window.__hlAt=Date.now()}if(Date.now()-window.__hlAt<6000)hlItem(it)}if(window.__mattach)window.__mattach();ntBadge();evPage(r);if(r=='notifications')evViews()}
 addEventListener('hashchange',()=>{window.__mq='';render()});
 render();setInterval(()=>{const sb=document.getElementById('spaBadge');if(sb){sb.innerHTML=badge(D.facilities[0].hours)}else if(!/menu|laundry|notifications/.test(location.hash)&&document.activeElement.tagName!='INPUT'){const y=scrollY;render();scrollTo(0,y)}ntBadge()},60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)ntBadge()});
 
@@ -974,7 +1003,7 @@ try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_pus
 setTimeout(alResync,3000);setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();if(typeof m.id=='string'&&/^a[a-z0-9]{3,30}$/.test(m.id))evTap(m.id);location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v28';
+window.APP_V='v29';
 setTimeout(cntFetch,500);setInterval(()=>{if(!document.hidden)cntFetch()},300000);
 try{const lo=+localStorage.getItem('vf_open')||0;if(Date.now()-lo>30*60000){ev('open');localStorage.setItem('vf_open',String(Date.now()))}if(standalone&&!localStorage.getItem('vf_inst')){ev('inst');localStorage.setItem('vf_inst','1')}}catch(e){}
 addEventListener('pagehide',()=>evFlush(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)evFlush(true);else cntFetch()});
@@ -1141,6 +1170,7 @@ const stem=w=>{w=w.replace(/['’]/g,'');
  if(w.length>3&&w.endsWith('e'))w=w.slice(0,-1);
  return w.replace(/([a-z])\1+/g,'$1')};
 const tok=s=>(String(s||'').toLowerCase().replace(/[’']/g,'').match(/[a-z0-9$%]+/g)||[]).filter(w=>w.length>1).map(stem);
+const IH=(h,t)=>/^#\/(venue|map)\//.test(h)||/\?/.test(h)||!t?h:h+'?i='+SLUG(t);
 const short=(s,n)=>s.length>n?s.slice(0,n-1).trim()+'…':s;
 const VA=[['marlin','marlin'],['iru','iru'],['fen|pool bar','fen'],['vah|global dining|buffet','vah'],['spa|mandara','spa'],['dive|diving|water sports','dive'],['in[- ]?room|room service','inroom']];
 const vroute=v=>v.id=='spa'?'#/spa':v.id=='dive'?'#/dive':'#/venue/'+v.id;
@@ -1248,7 +1278,7 @@ function buildDocs(){
   const parts=/\d\)\s/.test(nm)?nm.split(/\s*·?\s*\d\)\s*/).map(t=>t.trim()).filter(Boolean):null;
   const items=parts?parts.map(p=>{let place='';const pm=p.match(/^(.*?)\s*\(([^)]*)\)\s*$/);if(pm){p=pm[1];place=pm[2]}const am=p.match(/^(.*?)\s+at\s+(.*)$/);return am?[am[1],am[2]]:[p,place]}):[[nm,pl.split(' · ')[0]]];
   items.forEach(it=>{const key=it[0].toLowerCase()+'|'+it[1].toLowerCase();const g=G[key]||(G[key]={name:it[0],place:it[1],note:pl.split(' · ').slice(1).join(' · '),slots:[]});
-   g.slots.push({day:d,time:x[0],x:parts?[x[0],it[0],it[1]]:x})})}));
+   g.slots.push({day:d,time:x[0],x:parts?[x[0],it[0],it[1]]:x,raw:nm})})}));
  Object.values(G).forEach(g=>{docs.push({s:'Activities',t:g.name,x:g.slots.map(s=>s.day+' '+s.time).join(', ')+' · '+g.place,h:'#/activities',k:'activities weekly '+g.name+' '+g.place,a:al('Activities',g.name)+' '+g.place,w:1,act:g})});
  docs.forEach(d=>{const m=new Map();addTok(m,d.k,1);addTok(m,d.s,1.5);addTok(m,d.a,2.4);if(d.act)addTok(m,d.act.place,2.4);addTok(m,d.t,3*d.w);d.m=m});
  const V=new Map();docs.forEach(d=>d.m.forEach((w,s)=>V.set(s,(V.get(s)||0)+1)));
@@ -1300,7 +1330,12 @@ const INTENT=/\b(activit\w*|class(es)?|lessons?|workshops?|events?|sessions?|thi
 const DAYWORD=/\b(today|tonight|tomorrow|this (morning|afternoon|evening))\b/;
 function schedLines(docs,want,order){const L=[];docs.forEach(d=>d.act.slots.forEach(s=>{if(!want||s.day==want)L.push({d,s})}));
  L.sort((a,b)=>(a.d._p||0)-(b.d._p||0)||order.indexOf(a.s.day)-order.indexOf(b.s.day)||a.s.time.localeCompare(b.s.time));return L}
-const lnHtml=(L,showDay)=>L.map(({d,s})=>`<div class="ln"><span><b>${esc(d.act.name)}</b> ${showDay?esc(s.day)+' ':''}${esc(s.time.replace('–',' – '))}${d.act.place?' · '+lk(d.act.place):''}${d.act.note?' · '+lk(d.act.note):''}</span>${bellBtn(s.x,s.day)}</div>`).join('');
+function nextSlot(L){const now=mv(),di=DAYS.indexOf(now.day);let best=null,bd=1e9;
+ L.forEach(({d,s})=>{const st=String(s.time).split(/[–-]/)[0].split(':'),m=(+st[0])*60+(+st[1]||0);let diff=((DAYS.indexOf(s.day)-di+7)%7)*1440+m-now.min;if(diff<0)diff+=7*1440;if(diff<bd){bd=diff;best={d,s,diff}}});return best}
+// first button: the next upcoming session of what was asked about, deep-linked to that line on the weekly activities page
+const nextBtn=L=>{const n=nextSlot(L);if(!n)return null;const tm=String(n.s.time).split(/[–-]/)[0].trim().padStart(5,'0'),wd=n.diff<1440&&n.s.day==mv().day?'today':n.s.day.slice(0,3);return['Next: '+short(n.d.act.name,26)+', '+wd+' '+tm,slotH(n.s)]};
+const slotH=(s)=>'#/activities?i='+ACTID(s.day,s.time,s.raw);
+const lnHtml=(L,showDay)=>L.map(({d,s})=>`<div class="ln"><span><a class="lnn" href="${slotH(s)}"><b>${esc(d.act.name)}</b></a> ${showDay?esc(s.day)+' ':''}${esc(s.time.replace('–',' – '))}${d.act.place?' · '+lk(d.act.place):''}${d.act.note?' · '+lk(d.act.note):''}</span>${bellBtn(s.x,s.day)}</div>`).join('');
 // ---- search: concepts -> weighted matches over every entry
 function search(q){if(!DOCS)buildDocs();
  let rest=q;const C=[];
@@ -1331,7 +1366,7 @@ function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[
  const order=(()=>{const i=Math.max(0,DAYS.indexOf(mv().day));return DAYS.slice(i).concat(DAYS.slice(0,i))})();
  let want=dn||null,lab=dn||'';if(!want&&dayw){if(/tomorrow/.test(q)){want=order[1];lab='tomorrow ('+want+')'}else{want=mv().day;lab='today'}}
  // one named activity plus a day ("yoga on friday") -> just that activity on that day
- if(top&&schedTop&&(dn||dayw)){const L0=schedLines([top.d],want,order),L1=L0.length?L0:schedLines([top.d],null,order);return A(L0.length?`${top.d.act.name} on ${lab=='today'?'today':lab} (Maldives time):`:`${top.d.act.name} isn’t on ${lab=='today'?'today':lab}. Here’s when it runs (Maldives time):`,[['Weekly activities','#/activities']],lnHtml(L1,!L0.length))}
+ if(top&&schedTop&&(dn||dayw)){const L0=schedLines([top.d],want,order),L1=L0.length?L0:schedLines([top.d],null,order);{const nb=nextBtn(L1);return A(L0.length?`${top.d.act.name} on ${lab=='today'?'today':lab} (Maldives time):`:`${top.d.act.name} isn’t on ${lab=='today'?'today':lab}. Here’s when it runs (Maldives time):`,[...(nb?[nb]:[]),['Weekly activities','#/activities']],lnHtml(L1,!L0.length))}}
  // a category plus "activities / classes / what's on" -> the schedule entries in that category (e.g. spa + activities)
  const cats=CATS.filter(c=>c.q.test(q));
  if(cats.length&&(intent||dayw||dn)){
@@ -1345,15 +1380,15 @@ function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[
    let L=schedLines(docs,want,order),head;const nm=cats.length==1&&!named.length?cats[0].n:'Activities';
    if(want&&!L.length){L=schedLines(docs,null,order);head=`Nothing like that is listed for ${lab=='today'?'today':lab}. Here’s when it’s on this week (Maldives time):`}
    else head=named.length?`Here’s what the weekly schedule has (Maldives time):`:`${nm} on the weekly schedule${want?' for '+lab:''} (Maldives time):`;
-   const more=L.length>8;L=L.slice(0,8);
-   return A(head,[cats[0].go,...(cats[0].go[1]=='#/activities'?[]:[['Weekly activities','#/activities']])],lnHtml(L,!want||head.startsWith('Nothing')))}}
+   const nb=nextBtn(L);L=L.slice(0,8);
+   return A(head,[...(nb?[nb]:[]),cats[0].go,...(cats[0].go[1]=='#/activities'?[]:[['Weekly activities','#/activities']])],lnHtml(L,!want||head.startsWith('Nothing')))}}
  // spa voucher
  if(/(voucher|discount|15 ?%|complimentary|free (massage|tea)|spa offer|special offer|promotion)/.test(q)&&/(spa|mandara|massage|voucher|discount|offer)/.test(q)){const f=D.facilities[0];return A(`Mandara Spa offers 15% off spa treatments & wellness programmes for the length of your stay (at full published menu rates; can’t be combined with other promotions). There is also a complimentary 5-minute massage and ginger tea – present the voucher at the Spa. The spa is: ${status(f.hours).t}.`,[['Mandara Spa','#/spa'],['Call spa · ext. 618','tel:+9603336000,618']])}
  // the day's schedule
  const contentTerms=R.live?R.live.filter(c=>!/^(morning|afternoon|evening|night)$/.test(c.w[0])&&!INTENT.test(c.w.join(' '))&&!/^(activit|class|lesson|workshop|event|session|program|schedule|entertain|happen)/.test(c.w[0])).length:0;
  if(dn||(/(what'?s on|what is on|what'?s happening|going on|programme|schedule|entertainment)/.test(q)&&!schedTop)||(dayw&&!contentTerms)||(intent&&!contentTerms)){let d=dn||mv().day,lb=d==mv().day?'Today':d;if(/tomorrow/.test(q)){d=order[1];lb='Tomorrow ('+d+')'}
   const L=(D.act[d]||[]).concat(D.ent[d]||[]).slice().sort((a,b)=>a[0].localeCompare(b[0]));
-  return A(L.length?`${lb}${lb==d?'':' ('+d+')'} at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><span><b>${esc(x[0].replace('–',' – '))}</b> ${lk(x[1])}${x[2]?' · '+lk(x[2]):''}</span>${bellBtn(x,d)}</div>`).join(''))}
+  return A(L.length?`${lb}${lb==d?'':' ('+d+')'} at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><span><a class="lnn" href="#/activities?i=${ACTID(d,x[0],x[1])}"><b>${esc(x[0].replace('–',' – '))}</b></a> ${lk(x[1])}${x[2]?' · '+lk(x[2]):''}</span>${bellBtn(x,d)}</div>`).join(''))}
  // general search
  if(R.none)return A(R.n?`Sorry – I’m not sure about that one. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`:`I’d love to help – try a few key words, like “snorkelling”, “Marlin hours” or “spa massages”.`,R.n?Q:[]);
  const out=R.out;
@@ -1361,12 +1396,12 @@ function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[
  const best=out[0],strong=best.cov>=.6;
  if(!strong){const seen=new Set(),sug=[];for(const x of out){const key=x.d.t+'|'+x.d.h;if(seen.has(key)||x.cov<.3&&sug.length)continue;seen.add(key);sug.push(x);if(sug.length==3)break}
   if(!sug.length||!(best.th||best.sc>3))return A(`Sorry – I’m not sure about that one. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`,Q);
-  return A('I’m not completely sure what you’re after – is it one of these? If not, Reception can help (room phone ext. 650 or 666).',sug.map(x=>[short(x.d.t.replace(/^1\) /,''),30),x.d.h]))}
+  return A('I’m not completely sure what you’re after – is it one of these? If not, Reception can help (room phone ext. 650 or 666).',sug.map(x=>[short(x.d.t.replace(/^1\) /,''),30),x.d.act?slotH(x.d.act.slots[0]):x.d.page||x.d.s=='Menu'||x.d.s=='Venue'?x.d.h:IH(x.d.h,x.d.t)]))}
  const seen=new Set();let hits=out.filter(x=>{if(x.sc<best.sc*.45||x.cov<Math.max(.5,best.cov-.25))return false;const key=x.d.t+'|'+x.d.h+(x.d.act?'':x.d.x.slice(0,20));if(seen.has(key))return false;seen.add(key);return true});
  const shown=hits.slice(0,6),acts=[];if(/\bspa\b|mandara/.test(q)&&!shown.some(x=>x.d.h=='#/spa'&&x.d.page))acts.push(['Open Mandara Spa','#/spa']);
  let extra='';const sd=shown.filter(x=>x.d.act);
- shown.forEach(x=>{extra+=x.d.act?lnHtml(schedLines([x.d],null,order).slice(0,4),true):`<a class="mhit" href="${x.d.h}"><b>${esc(short(x.d.t,70))}</b><span>${esc(x.d.s)} · ${esc(short(x.d.x,90))}</span></a>`});
- if(sd.length)acts.push(['Weekly activities','#/activities']);
+ shown.forEach(x=>{extra+=x.d.act?lnHtml(schedLines([x.d],null,order).slice(0,4),true):`<a class="mhit" href="${x.d.page||x.d.s=='Menu'||x.d.s=='Venue'?x.d.h:IH(x.d.h,x.d.t)}"><b>${esc(short(x.d.t,70))}</b><span>${esc(x.d.s)} · ${esc(short(x.d.x,90))}</span></a>`});
+ if(sd.length){const nb=nextBtn(sd.flatMap(x=>schedLines([x.d],null,order)));if(nb)acts.unshift(nb);acts.push(['Weekly activities','#/activities'])}
  return A(`Here’s what the guide says${hits.length>6?` – the top 6 of ${hits.length} matches (add a word to narrow it down)`:hits.length>1?` (${hits.length} matches)`:''}:`,acts,extra)}
 const lg=$('#mlog');
 function say(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;return d}
@@ -1375,7 +1410,7 @@ const CH=['What’s on today?','What’s open now?','What time is Marlin open?',
 $('#mch').innerHTML=CH.map(c=>`<button type="button">${esc(c)}</button>`).join('');
 $('#mch').addEventListener('click',e=>{const b=e.target.closest('button');if(b)ask(b.textContent)});
 $('#mform').addEventListener('submit',e=>{e.preventDefault();const i=$('#mq2');ask(i.value);i.value=''});
-lg.addEventListener('click',e=>{if(e.target.closest('a'))closeChat()});
+lg.addEventListener('click',e=>{const a=e.target.closest('a');if(a){const h=a.getAttribute('href')||'',m=h.match(/^#\/[^?]*\?i=([a-z0-9-]+)$/);if(m&&h===location.hash){e.preventDefault();closeChat();setTimeout(()=>window.vfHL(m[1]),60);return}closeChat()}});
 const mm=$('#mmute');function mlab(){mm.textContent=muted()?`Speech bubbles are off – turn them on`:`Speech bubbles are on – mute ${MILO_NAME}`}mlab();
 mm.onclick=()=>{ls.set('vf_milo_mute',muted()?'0':'1');mlab()};
 const ms=$('#mstill');function slab(){ms.textContent=still()?`${MILO_NAME} is staying still – let him move again`:`Keep ${MILO_NAME} still`}slab();
