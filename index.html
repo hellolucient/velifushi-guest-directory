@@ -974,7 +974,7 @@ try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_pus
 setTimeout(alResync,3000);setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();if(typeof m.id=='string'&&/^a[a-z0-9]{3,30}$/.test(m.id))evTap(m.id);location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v27';
+window.APP_V='v28';
 setTimeout(cntFetch,500);setInterval(()=>{if(!document.hidden)cntFetch()},300000);
 try{const lo=+localStorage.getItem('vf_open')||0;if(Date.now()-lo>30*60000){ev('open');localStorage.setItem('vf_open',String(Date.now()))}if(standalone&&!localStorage.getItem('vf_inst')){ev('inst');localStorage.setItem('vf_inst','1')}}catch(e){}
 addEventListener('pagehide',()=>evFlush(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)evFlush(true);else cntFetch()});
@@ -1130,39 +1130,244 @@ new MutationObserver(()=>{if($('#sheet').classList.contains('on')){hideBub();ls.
 addEventListener('hashchange',()=>{if(Date.now()-lastBub>60000)setTimeout(()=>tryBub(0),1200)});
 setInterval(()=>{if(Date.now()-lastBub>120000&&bub.hidden&&performance.now()-lastInt>4000)tryBub(0)},20000);
 // ---- chat: client-side matching over the guide
-const STOP=new Set('what whats when where how much many is are the a an do does you your have has any there me my to tell show about i can for of in at on please get it we our us and or with price prices cost rate rates fee fees time times hour hours open opens opening close closes closing'.split(' '));
-const stem=w=>{w=w.replace(/ll/g,'l');if(w.length>5&&w.endsWith('ing'))w=w.slice(0,-3);else if(w.length>3&&w.endsWith('s')&&!w.endsWith('ss'))w=w.slice(0,-1);return w};
-let NK;const nk=()=>NK||(NK=D.index.map(h=>h.k.replace(/ll/g,'l')));
+const STOP=new Set(('what whats when where how much many is are was were be been am the a an do does did you your yours have has had any there me my mine to tell show about i can could would should will shall may might for of in at on out please get it its we our us and or with into from by as this that these those if so than then also just really very some someone something anything stuff thing things kind sort like look looking looks see supposed want wanted wondering wonder know find possibly maybe actually hello hi hey thanks im ive id ill dont doesnt didnt cant ok okay yes no not need needs go going goes come let lets one ones way bit little lot lots got they theyre theyd theyll them their he she his her who which whom whose why too still bring give make made takes take much price prices cost rate rates fee fees time times hour hours open opens opening close closes closing special specials today tonight tomorrow monday tuesday wednesday thursday friday saturday sunday available around here hotel guest guests visit visiting trip trips outing outings fun week weeks day days').split(' '));
+// light stemmer: plurals, -ing, -ed, trailing e, doubled letters ("snorkelling"="snorkeling", "masage"="massage")
+const stem=w=>{w=w.replace(/['’]/g,'');
+ if(w.length>4&&w.endsWith('ies'))w=w.slice(0,-3)+'y';
+ else if(w.length>5&&w.endsWith('ing'))w=w.slice(0,-3);
+ else if(w.length>4&&/(ch|sh|x|ss|z)es$/.test(w))w=w.slice(0,-2);
+ else if(w.length>3&&w.endsWith('s')&&!w.endsWith('ss'))w=w.slice(0,-1);
+ else if(w.length>4&&w.endsWith('ed'))w=w.slice(0,-2);
+ if(w.length>3&&w.endsWith('e'))w=w.slice(0,-1);
+ return w.replace(/([a-z])\1+/g,'$1')};
+const tok=s=>(String(s||'').toLowerCase().replace(/[’']/g,'').match(/[a-z0-9$%]+/g)||[]).filter(w=>w.length>1).map(stem);
 const short=(s,n)=>s.length>n?s.slice(0,n-1).trim()+'…':s;
 const VA=[['marlin','marlin'],['iru','iru'],['fen|pool bar','fen'],['vah|global dining|buffet','vah'],['spa|mandara','spa'],['dive|diving|water sports','dive'],['in[- ]?room|room service','inroom']];
 const vroute=v=>v.id=='spa'?'#/spa':v.id=='dive'?'#/dive':'#/venue/'+v.id;
 const DAYS=Object.keys(D.act);
-function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[- ]?fi/g,'wi-fi internet').trim();const A=(t,acts,extra)=>({t,acts:acts||[],extra:extra||''});
+// ---- extra words guests use for things in the guide (each is matched like the entry's own title)
+const ALIAS=[
+ [/^Excursion\|Behind the Island/,'back of house backstage behind the scenes engineer engineers engineering chief engineer tour desalination water plant fresh water wastewater power generator generators electricity infrastructure how the island works how it all works walking tour'],
+ [/^Excursion\|Big Game/,'deep sea fishing boat trip marlin tuna sailfish'],
+ [/^Excursion\|Sunset Cruise/,'boat sunset sundown sail sailing dhoni evening cruise'],
+ [/^Excursion\|Sunset Fishing/,'boat sunset fishing dhoni evening dinner catch'],
+ [/^Excursion\|Sandbank/,'sand bank picnic beach trip boat'],
+ [/^Excursion\|Dolphin/,'dolphins marine wildlife boat dhoni'],
+ [/^Excursion\|Local Village/,'locals island hopping culture community mosque school souvenirs shopping'],
+ [/^Excursion\|Thinadhoo/,'local island culture souvenirs shopping dhoni'],
+ [/^Activities\|Art of Massage/,'massage class lesson workshop learn teach spa wellness therapy relax session'],
+ [/^Activities\|Sundown Yoga/,'yoga wellness class stretch meditation mindful exercise sunset sundown relax session'],
+ [/^Activities\|Retail Bazaar/,'shopping shops souvenirs market gifts retail spa bazaar'],
+ [/^Activities\|Trial Diving/,'try diving scuba beginner first time introductory discover dive lagoon learn to dive'],
+ [/^Activities\|Live Cooking/,'cooking class cookery chef demonstration food show kitchen learn to cook'],
+ [/^Activities\|Make Your Own Cocktails/,'cocktail class bartender mixology learn cocktails drinks workshop'],
+ [/^Activities\|Traditional Maldivian Handicraft/,'crafts arts workshop weaving local culture traditional lesson class'],
+ [/^Activities\|Explore our Resort/,'resort tour walking tour guided tour orientation show me around'],
+ [/^Activities\|Beach Cleaning/,'beach clean up cleanup eco environment volunteer litter'],
+ [/^Activities\|Beach Cinema/,'movie movies film cinema outdoor night screening'],
+ [/^Activities\|Karaoke/,'singing sing music night'],
+ [/^Activities\|Pool Party/,'party music pool dance'],
+ [/^Activities\|Dart/,'darts game competition tournament'],
+ [/^Activities\|Zumba/,'dance fitness exercise workout class'],
+ [/^Activities\|Beach Volleyball/,'sport game volley ball'],
+ [/^Activities\|DJ/,'music disco party dance nightlife'],
+ [/^Activities\|Live Saxophone/,'music jazz live sax'],
+ [/^Activities\|Sunset Sax/,'music jazz live saxophone'],
+ [/^Activities\|Balinese Dance/,'dance show cultural performance bali'],
+ [/^Activities\|Live Band/,'music live band performance concert'],
+ [/^Dive & Water Sports\|(Introduction dive|Resort Diver|Further Resort)/,'first time beginner try discover scuba trial learn'],
+ [/^Dive & Water Sports\|Open Water/,'learn to dive certification certificate beginner padi first time course'],
+ [/^Dive & Water Sports\|Camera/,'underwater photos photography gopro hire rent'],
+ [/^Dive & Water Sports\|(Mask|Snorkel|Fins|Full Face)/,'snorkelling gear equipment hire rent'],
+ [/^Services\|Internet/,'wifi wi-fi password online connect network'],
+ [/^Services\|Check-out/,'checkout departure leaving leave late check out'],
+ [/^Services\|Adaptors/,'plug socket sockets charger hairdryer hair dryer power outlet voltage converter'],
+ [/^Services\|Doctor/,'medical clinic nurse sick unwell ill health pharmacy medicine hospital'],
+ [/^Services\|Safe deposit/,'safe valuables passport locker security'],
+ [/^Services\|Foreign currency/,'money cash currency change dollars'],
+ [/^Services\|Laundry/,'washing clothes dry cleaning iron ironing'],
+ [/^Services\|Baggage/,'luggage bags suitcase'],
+ [/^Services\|Wake-up/,'alarm wake up'],
+ [/^Services\|Mini bar/,'minibar fridge snacks'],
+ [/^Services\|Extra bed/,'cot crib baby bed'],
+ [/^Services\|Credit cards/,'card payment visa mastercard pay'],
+ [/^Contact\|Room phone – Reception/,'front desk reception phone call number contact'],
+ [/^Contact\|Mandara Spa/,'spa phone number call contact'],
+ [/^Contact\|Weddings/,'wedding dining enquiries phone call'],
+ [/^Map\|Fitness/,'gym workout exercise'],
+ [/^Map\|Kid/,'kids club children play room childcare family'],
+ [/^Map\|Medical/,'doctor nurse'],
+ [/^Map\|Arrival Pier/,'boat arrival transfer dock speedboat'],
+ [/^Map\|Seaplane/,'seaplane airport transfer flight'],
+ [/^Map\|Mosque/,'prayer pray muslim'],
+ [/^Map\|Shopping/,'shop shops souvenirs boutique gift'],
+ [/^Map\|Swimming Pool/,'pool swim swimming'],
+ [/^Venue\|Marlin/,'seafood restaurant fish fine dining wine bar dinner'],
+ [/^Venue\|Vah/,'buffet breakfast main restaurant'],
+ [/^Venue\|In-Room/,'inroom room service deliver to room breakfast in bed'],
+ [/^Venue\|Fen/,'pool bar snacks drinks'],
+ [/^Venue\|Iru/,'lunch dinner cocktail bar'],
+ [/^Venue\|Dive/,'diving school dive centre scuba'],
+ [/^Kids’ Menu\|/,'children kids toddler baby child family'],
+ [/^High Tea by the Shore\|/,'afternoon tea cakes scones'],
+ [/^Japanese & Korean Spirits\|/,'whisky whiskey sake soju shochu'],
+ [/^Destination Dining\|Romance/,'romantic dinner beach couple anniversary candlelit proposal'],
+ [/^Destination Dining\|Private Barbecue/,'bbq grill barbecue beach'],
+ [/^Destination Dining\|Champagne/,'romantic beach breakfast couple'],
+ [/^Destination Dining\|/,'private dining romantic couple beach special occasion signature'],
+ [/^Wedding\|(1h photography|Photograph)/,'photographer photos pictures'],
+ [/^Wedding add-on\|Photographer/,'photographer photos pictures'],
+ [/^Wedding/,'wedding marriage married marry honeymoon vows ceremony bride groom elope']
+];
+// pages and menus a guest may be asking for by name
+const PAGES=[
+ ['Restaurants & Bars','#/dining','restaurants restaurant bars bar dining eat food where to eat venues'],
+ ['All menus','#/menus','menus menu food drinks'],
+ ['Excursions','#/excursions','excursions excursion trips boat tours boat trips day trips outings dhoni activities away from the resort'],
+ ['Weekly activities','#/activities','weekly activities entertainment schedule events programme what is on classes shows'],
+ ['Mandara Spa','#/spa','spa treatments massage menu wellness facial'],
+ ['Dive & Sail','#/dive','diving snorkelling water sports scuba rates prices'],
+ ['Weddings','#/wedding','wedding marriage honeymoon vows ceremony beach wedding packages'],
+ ['Signature dining experiences','#/special','signature destination dining romantic dinner private dining beach dinner special occasion'],
+ ['All Inclusive & Soft All Inclusive','#/packages','all inclusive soft all inclusive packages meal plan what is included'],
+ ['Compendium – info & services','#/compendium','compendium information services house rules guide'],
+ ['Contacts','#/contacts','contacts phone numbers extensions reception call'],
+ ['Resort map','#/map','map where is directions find location layout'],
+ ['Reef care','#/sustain','reef care coral sustainability environment']
+];
+let DOCS,VOC,DFN=1;
+const addTok=(m,text,w)=>tok(text).forEach(s=>{if(!(m.get(s)>=w))m.set(s,w)});
+function buildDocs(){
+ const docs=[],al=(s,t)=>ALIAS.filter(a=>a[0].test(s+'|'+t)).map(a=>a[1]).join(' ');
+ D.index.forEach(h=>{if(h.s=='Activities')return;docs.push({s:h.s,t:h.t,x:h.x,h:h.h,k:h.k,a:al(h.s,h.t),w:1})});
+ D.menus.forEach(m=>docs.push({s:'Menu',t:m.title,x:m.venue||'',h:'#/menu/'+m.id,k:'menu '+m.title+' '+(m.venue||''),a:al(m.title,'')+' menu',w:.9}));
+ PAGES.forEach(p=>docs.push({s:'Page',t:p[0],x:'',h:p[1],k:p[0],a:p[2],w:1.1,page:1}));
+ // weekly schedule: one searchable entry per activity (combined slots like "1) Volleyball · 2) Yoga" are split up)
+ const G={};
+ DAYS.forEach(d=>(D.act[d]||[]).concat(D.ent[d]||[]).forEach(x=>{const nm=String(x[1]),pl=String(x[2]||'');
+  const parts=/\d\)\s/.test(nm)?nm.split(/\s*·?\s*\d\)\s*/).map(t=>t.trim()).filter(Boolean):null;
+  const items=parts?parts.map(p=>{let place='';const pm=p.match(/^(.*?)\s*\(([^)]*)\)\s*$/);if(pm){p=pm[1];place=pm[2]}const am=p.match(/^(.*?)\s+at\s+(.*)$/);return am?[am[1],am[2]]:[p,place]}):[[nm,pl.split(' · ')[0]]];
+  items.forEach(it=>{const key=it[0].toLowerCase()+'|'+it[1].toLowerCase();const g=G[key]||(G[key]={name:it[0],place:it[1],note:pl.split(' · ').slice(1).join(' · '),slots:[]});
+   g.slots.push({day:d,time:x[0],x:parts?[x[0],it[0],it[1]]:x})})}));
+ Object.values(G).forEach(g=>{docs.push({s:'Activities',t:g.name,x:g.slots.map(s=>s.day+' '+s.time).join(', ')+' · '+g.place,h:'#/activities',k:'activities weekly '+g.name+' '+g.place,a:al('Activities',g.name)+' '+g.place,w:1,act:g})});
+ docs.forEach(d=>{const m=new Map();addTok(m,d.k,1);addTok(m,d.s,1.5);addTok(m,d.a,2.4);if(d.act)addTok(m,d.act.place,2.4);addTok(m,d.t,3*d.w);d.m=m});
+ const V=new Map();docs.forEach(d=>d.m.forEach((w,s)=>V.set(s,(V.get(s)||0)+1)));
+ DOCS=docs;VOC=V;DFN=docs.length}
+const idf=s=>Math.log(1+DFN/(VOC.get(s)||1));
+const ed=(a,b,m)=>{if(Math.abs(a.length-b.length)>m)return m+1;let p=[];for(let j=0;j<=b.length;j++)p[j]=j;for(let i=1;i<=a.length;i++){const c=[i];let mn=i;for(let j=1;j<=b.length;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]==b[j-1]?0:1));if(c[j]<mn)mn=c[j]}if(mn>m)return m+1;p=c}return p[b.length]};
+// words in the guide that a query word could mean: itself, longer forms (photograph -> photographer), or a typo (snorkling -> snorkel)
+function expand(w){const ex=new Map();if(VOC.has(w))ex.set(w,1);
+ if(w.length>=5)for(const v of VOC.keys())if(v!==w&&v.startsWith(w)&&v.length<=w.length+4)ex.set(v,.85);
+ if(!ex.size&&w.length>=6){const d=w.length>=9?2:1;for(const v of VOC.keys())if(v.slice(0,3)==w.slice(0,3)&&Math.abs(v.length-w.length)<=d&&ed(v,w,d)<=d)ex.set(v,.7)}
+ return ex}
+// phrases that mean one thing (the matched words are replaced by that thing)
+const PHRASE=[
+ [/\bback ?of ?(the )?house\b|\bbehind (the )?scenes?\b|\bbackstage\b|\bhow (the |this |our )?(island|resort|place|hotel) (works?|runs?|operates?)\b|\bhow (it all|everything|the stuff|the things?|stuff|things) (works?|runs?|operates?)\b|\binner workings?\b/,'behind scene engineer desalination generator'],
+ [/\b(chief )?engineers?\b|\bengineering\b|\bdesalination\b|\bdesal\b|\bwaste ?water\b|\bsewage\b|\bgenerators?\b|\bpower (plant|station|house)\b|\bwater (plant|treatment|supply|production|purification)\b|\bwhere does (the |our )?(fresh |drinking )?(water|power|electricity) come from\b|\bhow (is|do you (make|get)|does the resort (make|get)) (the |our )?(fresh |drinking )?(water|power|electricity)( made| produced)?\b/,'engineer desalination generator wastewater'],
+ [/\bfirst time\b|\bnever (dived|dove|scuba)\b|\bbeginners?\b|\bnewbie\b|\bnovice\b/,'trial introduction bubble discover resort'],
+ [/\broom service\b|\bin ?room\b|\bbreakfast in bed\b|\bdeliver\w* to (my|our|the) room\b/,'inroom'],
+ [/\bcheck ?-?out\b/,'checkout departure'],
+ [/\bwi ?-?fi\b|\bpassword\b|\bonline\b/,'internet']];
+// extra meanings added alongside the guest's own words
+const SYNW=[
+ [/\b(kids?|child(ren)?|toddlers?|babies|baby|infants?|little ones?)\b/,'kids children playroom'],
+ [/\b(married|marry|marriage|honeymoon\w*|elope\w*|vows|bride|groom|nuptial\w*)\b/,'wedding'],
+ [/\b(romantic|romance|anniversary|proposal|propose|candle ?lit)\b/,'romance couple dinner'],
+ [/\b(boats?|sail\w*|dhoni|cruise)\b/,'dhoni cruise excursion'],
+ [/\b(trips?|outings?|day trips?|island hopping|sightseeing)\b/,'excursion',.5],
+ [/\b(gym|workout|exercise|fitness)\b/,'fitness centre gym'],
+ [/\b(reserve\w*|book\w*|reservation\w*|advance)\b/,'reserve reservation'],
+ [/\b(spirits?|whisk(e)?y|sake|soju|shochu|japanese|korean)\b/,'japanese korean spirits'],
+ [/\b(plug|sockets?|adaptors?|adapters?|charger|hair ?dryer|voltage|converter)\b/,'adaptors'],
+ [/\b(doctor|medical|clinic|nurse|sick|unwell|pharmacy|medicine|hospital)\b/,'doctor medical clinic'],
+ [/\b(money|currency|cash|exchange)\b/,'currency exchange'],
+ [/\b(laundry|washing|dry ?clean\w*|ironing|clothes)\b/,'laundry'],
+ [/\b(valuables|passport|locker)\b/,'safe deposit'],
+ [/\b(airport|transfer|seaplane|speed ?boat|arrival|jetty|pier)\b/,'seaplane jetty pier arrival'],
+ [/\b(pray\w*|mosque|muslim|islam\w*)\b/,'mosque prayer'],
+ [/\b(shop\w*|souvenirs?|boutique)\b/,'shopping retail bazaar'],
+ [/\b(phone|call|ring|dial|contact)\b/,'phone contact'],
+ [/\b(afternoon tea|high tea|scones?)\b/,'afternoon tea']];
+// category + "activities/classes" -> the weekly schedule entries in that category
+const CATS=[
+ {n:'Spa & wellness',q:/\b(spa|mandara|massages?|wellness|relax\w*|pamper\w*|yoga|meditat\w*|mindful\w*|therap\w*)\b/,gen:'spa mandara wellness relax pamper therapy',a:[/massage/,/yoga|wellness/,/spa/],go:['Open Mandara Spa','#/spa']},
+ {n:'Diving & snorkelling',q:/\b(dive|diving|scuba|snorkel\w*|underwater)\b/,gen:'dive diving scuba snorkel underwater',a:[/diving|dive|snorkel/],go:['Dive & Sail','#/dive']},
+ {n:'Cooking & drinks',q:/\b(cook\w*|cocktail\w*|chefs?|bartend\w*|mixolog\w*)\b/,gen:'chef bartender',a:[/cook|cocktail|chef/],go:['Restaurants & Bars','#/dining']},
+ {n:'Music & dancing',q:/\b(music\w*|bands?|dj|danc\w*|sax\w*|sing\w*|karaoke|nightlife|disco|concert\w*|performance\w*|cinema|movies?)\b/,gen:'music band nightlife disco concert performance',a:[/dj|sax|band|karaoke|dance|cinema|party/],go:['Weekly activities','#/activities']},
+ {n:'Sports & games',q:/\b(sports?|volleyball|darts?|zumba|games?|fitness|exercise\w*|workout\w*)\b/,gen:'sport game',a:[/volleyball|dart|zumba/],go:['Weekly activities','#/activities']},
+ {n:'Culture & crafts',q:/\b(crafts?|handicrafts?|culture|cultural|traditional|bazaar|shopping)\b/,gen:'craft culture cultural traditional shopping',a:[/handicraft|bazaar|balinese|resort/],go:['Weekly activities','#/activities']}];
+const INTENT=/\b(activit\w*|class(es)?|lessons?|workshops?|events?|sessions?|things? to do|programme|program|schedule|entertainment|what'?s on|what is on|happening|going on)\b/;
+const DAYWORD=/\b(today|tonight|tomorrow|this (morning|afternoon|evening))\b/;
+function schedLines(docs,want,order){const L=[];docs.forEach(d=>d.act.slots.forEach(s=>{if(!want||s.day==want)L.push({d,s})}));
+ L.sort((a,b)=>(a.d._p||0)-(b.d._p||0)||order.indexOf(a.s.day)-order.indexOf(b.s.day)||a.s.time.localeCompare(b.s.time));return L}
+const lnHtml=(L,showDay)=>L.map(({d,s})=>`<div class="ln"><span><b>${esc(d.act.name)}</b> ${showDay?esc(s.day)+' ':''}${esc(s.time.replace('–',' – '))}${d.act.place?' · '+lk(d.act.place):''}${d.act.note?' · '+lk(d.act.note):''}</span>${bellBtn(s.x,s.day)}</div>`).join('');
+// ---- search: concepts -> weighted matches over every entry
+function search(q){if(!DOCS)buildDocs();
+ let rest=q;const C=[];
+ PHRASE.forEach(([re,w])=>{if(re.test(rest)){C.push({w:w.split(' ').map(stem),m:1.4});rest=rest.replace(re,' ')}});
+ const base=[...new Set(tok(rest.replace(/[^a-z0-9$%'’ ]/g,' ').split(/\s+/).filter(w=>w.length>1&&!STOP.has(w)).join(' ')))].filter(t=>t.length>1&&!STOP.has(t));
+ base.forEach(t=>C.push({w:[t],m:1}));
+ SYNW.forEach(([re,w,m])=>{if(re.test(q))C.push({w:w.split(' ').map(stem),m:m||1})});
+ const price=/\b(price|cost|how much|rate|fee)\b/.test(q);
+ C.forEach(c=>{c.ex=new Map();c.w.forEach(w=>expand(w).forEach((ql,v)=>{if(!(c.ex.get(v)>=ql))c.ex.set(v,ql)}));c.i=0;c.ex.forEach((ql,v)=>{c.i=Math.max(c.i,idf(v))});c.W=c.i*c.m});
+ const live=C.filter(c=>c.ex.size),tw=live.reduce((a,c)=>a+c.W,0);
+ if(!live.length)return{none:1,n:base.length};
+ const out=[];DOCS.forEach(d=>{let sc=0,mw=0,th=0;live.forEach(c=>{let b=0;c.ex.forEach((ql,v)=>{const f=d.m.get(v);if(f){const s=ql*idf(v)*f;if(s>b){b=s}if(f>=2.4&&ql>=.85)th=1}});if(b){sc+=b*c.m;mw+=c.W}});
+  if(sc){if(price&&/\$|usd/i.test(d.x))sc+=.8;out.push({d,sc,cov:mw/tw,th})}});
+ out.sort((a,b)=>b.sc-a.sc);return{out,live}}
+function answer(q0){const q=q0.toLowerCase().replace(/[’']/g,"'").replace(/wi[- ]?fi/g,'wifi').trim();const A=(t,acts,extra)=>({t,acts:acts||[],extra:extra||''});
  const Q=[['Compendium','#/compendium'],['Contacts','#/contacts']];
- if(/^(hi|hello|hey|hola|good (morning|evening|afternoon))\b/.test(q))return A(`Hello! I’m ${MILO_NAME}, your guide. Ask me about opening hours, activities, menus, the spa or excursions – or tap a suggestion below.`);
+ if(/^(hi|hello|hey|hola|good (morning|evening|afternoon))\b[\s!.,]*(there|milo|everyone|all)?[\s!.,]*$/.test(q))return A(`Hello! I’m ${MILO_NAME}, your guide. Ask me about opening hours, activities, menus, the spa or excursions – or tap a suggestion below.`);
  if(/thank/.test(q))return A('You’re welcome! Ask me anything else about the guide.');
+ const R=search(q.replace(/'/g,''));
+ const top=R.out&&R.out[0],schedTop=top&&top.d.act&&top.cov>=.8&&top.th&&(R.out.length<2||top.sc>=R.out[1].sc*1.15);
  // opening hours of a named venue
- if(/\b(open|opens|opening|close|closes|closing|hours?|time|times|when)\b/.test(q)){for(const [re,id] of VA){if(new RegExp('\\b('+re+')\\b').test(q)){const v=D.venues.concat(D.facilities).find(x=>x.id==id);if(v){const st=status(v.hours),nm=v.name.replace(/ \(.*/,'');return A(`${nm}: ${st.t}. All hours (Maldives time): ${v.hours.map(h=>`${h.l} ${fmt(h.a[0])} – ${fmt(h.a[1])}`).join(', ')}.`,[['Open '+nm.split(' ')[0],vroute(v)]].concat((v.menus||[]).slice(0,2).map(m=>[MENU[m].title.replace(/ \(.*/,''),'#/menu/'+m])).concat(v.mapno?[['Map','#/map/'+v.mapno]]:[]))}}}}
+ if(!schedTop&&/\b(open|opens|opening|close|closes|closing|hours?|times|what time|when)\b/.test(q.replace(/first time/g,' '))){for(const [re,id] of VA){if(new RegExp('\\b('+re+')\\b').test(q)){const v=D.venues.concat(D.facilities).find(x=>x.id==id);if(v){const st=status(v.hours),nm=v.name.replace(/ \(.*/,'');return A(`${nm}: ${st.t}. All hours (Maldives time): ${v.hours.map(h=>`${h.l} ${fmt(h.a[0])} – ${fmt(h.a[1])}`).join(', ')}.`,[['Open '+nm.split(' ')[0],vroute(v)]].concat((v.menus||[]).slice(0,2).map(m=>[MENU[m].title.replace(/ \(.*/,''),'#/menu/'+m])).concat(v.mapno?[['Map','#/map/'+v.mapno]]:[]))}}}}
  // what is open now
- if(/(open now|what'?s open|currently open|open right now|open today|hungry|where .*eat)/.test(q)){const o=D.venues.concat(D.facilities).map(v=>({v,s:status(v.hours)})).filter(x=>x.s.s=='open');
+ if(/(open now|what'?s open|currently open|open right now|open today|hungry|where .*\beat\b)/.test(q)){const o=D.venues.concat(D.facilities).map(v=>({v,s:status(v.hours)})).filter(x=>x.s.s=='open');
   return o.length?A(`Open right now (Maldives time): ${o.map(x=>x.v.name.replace(/ \(.*/,'')+' – '+x.s.t.replace(/^Open now · /,'')).join('; ')}.`,[['Restaurants & Bars','#/dining']]):A('Nothing is open at this moment. The full hours are on the Restaurants & Bars page.',[['Restaurants & Bars','#/dining']])}
- // schedule
- const dn=DAYS.find(d=>q.includes(d.toLowerCase()));
- if(dn||/(today|tonight|tomorrow|what'?s on|what is on|activit|entertain|happening|schedule|programme)/.test(q)){let d=dn||mv().day,lab=d==mv().day?'Today':d;if(/tomorrow/.test(q)){d=DAYS[(DAYS.indexOf(mv().day)+1)%7];lab='Tomorrow ('+d+')'}
-  const L=(D.act[d]||[]).concat(D.ent[d]||[]).slice().sort((a,b)=>a[0].localeCompare(b[0]));
-  return A(L.length?`${lab} (${d}) at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><span><b>${esc(x[0].replace('–',' – '))}</b> ${lk(x[1])}${x[2]?' · '+lk(x[2]):''}</span>${bellBtn(x,d)}</div>`).join(''))}
+ if(!DOCS)buildDocs();
+ const dn=DAYS.find(d=>new RegExp('\\b'+d.toLowerCase()+'\\b').test(q)),dayw=DAYWORD.test(q),intent=INTENT.test(q);
+ const order=(()=>{const i=Math.max(0,DAYS.indexOf(mv().day));return DAYS.slice(i).concat(DAYS.slice(0,i))})();
+ let want=dn||null,lab=dn||'';if(!want&&dayw){if(/tomorrow/.test(q)){want=order[1];lab='tomorrow ('+want+')'}else{want=mv().day;lab='today'}}
+ // one named activity plus a day ("yoga on friday") -> just that activity on that day
+ if(top&&schedTop&&(dn||dayw)){const L0=schedLines([top.d],want,order),L1=L0.length?L0:schedLines([top.d],null,order);return A(L0.length?`${top.d.act.name} on ${lab=='today'?'today':lab} (Maldives time):`:`${top.d.act.name} isn’t on ${lab=='today'?'today':lab}. Here’s when it runs (Maldives time):`,[['Weekly activities','#/activities']],lnHtml(L1,!L0.length))}
+ // a category plus "activities / classes / what's on" -> the schedule entries in that category (e.g. spa + activities)
+ const cats=CATS.filter(c=>c.q.test(q));
+ if(cats.length&&(intent||dayw||dn)){
+  const sdocs=DOCS.filter(d=>d.act);let pick=[];
+  cats.forEach(c=>sdocs.forEach(d=>{const hay=(d.act.name+' '+d.act.place).toLowerCase();const p=c.a.findIndex(r=>r.test(hay));if(p>=0&&!pick.some(x=>x.d==d))pick.push({d,p,c})}));
+  if(pick.length){
+   const gen=new Set(cats.map(c=>c.gen).join(' ').split(' ').map(stem)),gq=new Set(tok(q.replace(INTENT,' ').split(/\s+/).filter(w=>!STOP.has(w)).join(' ')).filter(t=>!gen.has(t)&&!STOP.has(t)&&t.length>1));
+   const named=pick.filter(x=>{const tt=new Set(tok(x.d.act.name+' '+x.d.a.replace(x.d.act.place,'')));return [...gq].some(t=>tt.has(t))});
+   if(named.length)pick=named;
+   pick.forEach(x=>x.d._p=x.p);const docs=pick.map(x=>x.d);
+   let L=schedLines(docs,want,order),head;const nm=cats.length==1&&!named.length?cats[0].n:'Activities';
+   if(want&&!L.length){L=schedLines(docs,null,order);head=`Nothing like that is listed for ${lab=='today'?'today':lab}. Here’s when it’s on this week (Maldives time):`}
+   else head=named.length?`Here’s what the weekly schedule has (Maldives time):`:`${nm} on the weekly schedule${want?' for '+lab:''} (Maldives time):`;
+   const more=L.length>8;L=L.slice(0,8);
+   return A(head,[cats[0].go,...(cats[0].go[1]=='#/activities'?[]:[['Weekly activities','#/activities']])],lnHtml(L,!want||head.startsWith('Nothing')))}}
  // spa voucher
- if(/(voucher|discount|15 ?%|offer|complimentary|free)/.test(q)&&/(spa|mandara|massage|voucher|discount|offer)/.test(q)){const f=D.facilities[0];return A(`Mandara Spa offers 15% off spa treatments & wellness programmes for the length of your stay (at full published menu rates; can’t be combined with other promotions). There is also a complimentary 5-minute massage and ginger tea – present the voucher at the Spa. The spa is: ${status(f.hours).t}.`,[['Mandara Spa','#/spa'],['Call spa · ext. 618','tel:+9603336000,618']])}
- // generic search over the 959-entry index
- const price=/(price|cost|how much|rate|fee)/.test(q);
- const words=q.replace(/[^a-z0-9$%\- ]/g,' ').split(/\s+/).filter(w=>w.length>1&&!STOP.has(w)),terms=[...new Set(words.map(stem))].filter(t=>t.length>1);
- if(!terms.length)return A(`I’d love to help – try a few key words, like “snorkelling”, “Marlin hours” or “spa massages”.`);
- const K=nk();let hits=[];D.index.forEach((h,i)=>{let sc=0;terms.forEach(t=>{if(K[i].includes(t))sc++});if(sc){const tt=h.t.toLowerCase().replace(/ll/g,'l'),ss=h.s.toLowerCase().replace(/ll/g,'l');terms.forEach(t=>{if(tt.includes(t))sc+=.6;if(ss.includes(t))sc+=.4});if(price&&/\$|usd/i.test(h.x))sc+=.8;hits.push({h,sc,full:K[i]&&terms.every(t=>K[i].includes(t))})}});
- hits=hits.filter(x=>x.full);const part=false;
- hits.sort((a,b)=>b.sc-a.sc);
- if(!hits.length)return A(`Sorry – I’m not sure about that one. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`,Q);
- const top=hits.slice(0,6),acts=[];if(/\bspa\b|mandara/.test(q))acts.push(['Open Mandara Spa','#/spa']);
- return A(`${part?'I found close matches':'Here’s what the guide says'}${hits.length>6?` – the top 6 of ${hits.length} matches (add a word to narrow it down)`:hits.length>1?` (${hits.length} matches)`:''}:`,acts,top.map(x=>`<a class="mhit" href="${x.h.h}"><b>${esc(short(x.h.t,70))}</b><span>${esc(x.h.s)} · ${esc(short(x.h.x,90))}</span></a>`).join(''))}
+ if(/(voucher|discount|15 ?%|complimentary|free (massage|tea)|spa offer|special offer|promotion)/.test(q)&&/(spa|mandara|massage|voucher|discount|offer)/.test(q)){const f=D.facilities[0];return A(`Mandara Spa offers 15% off spa treatments & wellness programmes for the length of your stay (at full published menu rates; can’t be combined with other promotions). There is also a complimentary 5-minute massage and ginger tea – present the voucher at the Spa. The spa is: ${status(f.hours).t}.`,[['Mandara Spa','#/spa'],['Call spa · ext. 618','tel:+9603336000,618']])}
+ // the day's schedule
+ const contentTerms=R.live?R.live.filter(c=>!/^(morning|afternoon|evening|night)$/.test(c.w[0])&&!INTENT.test(c.w.join(' '))&&!/^(activit|class|lesson|workshop|event|session|program|schedule|entertain|happen)/.test(c.w[0])).length:0;
+ if(dn||(/(what'?s on|what is on|what'?s happening|going on|programme|schedule|entertainment)/.test(q)&&!schedTop)||(dayw&&!contentTerms)||(intent&&!contentTerms)){let d=dn||mv().day,lb=d==mv().day?'Today':d;if(/tomorrow/.test(q)){d=order[1];lb='Tomorrow ('+d+')'}
+  const L=(D.act[d]||[]).concat(D.ent[d]||[]).slice().sort((a,b)=>a[0].localeCompare(b[0]));
+  return A(L.length?`${lb}${lb==d?'':' ('+d+')'} at Velifushi:`:`Nothing is listed for ${d} in the guide.`,[['Weekly activities','#/activities']],L.map(x=>`<div class="ln"><span><b>${esc(x[0].replace('–',' – '))}</b> ${lk(x[1])}${x[2]?' · '+lk(x[2]):''}</span>${bellBtn(x,d)}</div>`).join(''))}
+ // general search
+ if(R.none)return A(R.n?`Sorry – I’m not sure about that one. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`:`I’d love to help – try a few key words, like “snorkelling”, “Marlin hours” or “spa massages”.`,R.n?Q:[]);
+ const out=R.out;
+ if(!out.length)return A(`Sorry – I’m not sure about that one. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`,Q);
+ const best=out[0],strong=best.cov>=.6;
+ if(!strong){const seen=new Set(),sug=[];for(const x of out){const key=x.d.t+'|'+x.d.h;if(seen.has(key)||x.cov<.3&&sug.length)continue;seen.add(key);sug.push(x);if(sug.length==3)break}
+  if(!sug.length||!(best.th||best.sc>3))return A(`Sorry – I’m not sure about that one. The Compendium has info & services and contacts, and Reception can help (room phone ext. 650 or 666).`,Q);
+  return A('I’m not completely sure what you’re after – is it one of these? If not, Reception can help (room phone ext. 650 or 666).',sug.map(x=>[short(x.d.t.replace(/^1\) /,''),30),x.d.h]))}
+ const seen=new Set();let hits=out.filter(x=>{if(x.sc<best.sc*.45||x.cov<Math.max(.5,best.cov-.25))return false;const key=x.d.t+'|'+x.d.h+(x.d.act?'':x.d.x.slice(0,20));if(seen.has(key))return false;seen.add(key);return true});
+ const shown=hits.slice(0,6),acts=[];if(/\bspa\b|mandara/.test(q)&&!shown.some(x=>x.d.h=='#/spa'&&x.d.page))acts.push(['Open Mandara Spa','#/spa']);
+ let extra='';const sd=shown.filter(x=>x.d.act);
+ shown.forEach(x=>{extra+=x.d.act?lnHtml(schedLines([x.d],null,order).slice(0,4),true):`<a class="mhit" href="${x.d.h}"><b>${esc(short(x.d.t,70))}</b><span>${esc(x.d.s)} · ${esc(short(x.d.x,90))}</span></a>`});
+ if(sd.length)acts.push(['Weekly activities','#/activities']);
+ return A(`Here’s what the guide says${hits.length>6?` – the top 6 of ${hits.length} matches (add a word to narrow it down)`:hits.length>1?` (${hits.length} matches)`:''}:`,acts,extra)}
 const lg=$('#mlog');
 function say(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;return d}
 function ask(q){q=q.trim();if(!q)return;say('mu',esc(q));if(/thank/i.test(q)){heartAv()}const r=answer(q);say('mb',esc(r.t)+r.extra+(r.acts.length?`<div class="mact">${r.acts.map((a,i)=>`<a class="${i?'alt':''}" href="${a[1]}">${esc(a[0])}</a>`).join('')}</div>`:''));}
