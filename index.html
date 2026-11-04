@@ -676,8 +676,8 @@ async function alSend(path,body,sub){try{if(!sub){if(!PUSH_OK)return false;const
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),10000);const r=await fetch(PUSH_API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p),signal:c.signal});clearTimeout(tm);return r.ok}catch(e){return false}}
 async function alResync(){try{if(!PUSH_OK||Notification.permission!='granted')return;const q=JSON.parse(localStorage.getItem('vf_al_rm')||'[]');
  for(const id of q.slice()){if(await alSend('/alert/remove',{id})){q.splice(q.indexOf(id),1)}}localStorage.setItem('vf_al_rm',JSON.stringify(q))}catch(e){}}
-const LK_RE=/Iru Kitchen &amp; Bar|Fen Pool Bar(?: Deck)?|Mandara Spa|Dive Center|Trial Diving/g;
-const lk=t=>esc(t).replace(LK_RE,m=>`<a class="lk" href="${m.startsWith('Iru')?'#/venue/iru':m.startsWith('Fen')?'#/venue/fen':m.startsWith('Mandara')?'#/spa':'#/dive'}">${m}</a>`);
+const LK_RE=/Iru Kitchen &amp; Bar|Fen Pool Bar(?: Deck)?|FEN Bar|Fen Bar|Mandara Spa|Dive Center|Trial Diving/g;
+const lk=t=>esc(t).replace(LK_RE,m=>`<a class="lk" href="${m.startsWith('Iru')?'#/venue/iru':/^fen/i.test(m)?'#/venue/fen':m.startsWith('Mandara')?'#/spa':'#/dive'}">${m}</a>`);
 function actToday(){const d=mv().day;const a=D.act[d]||[],e=D.ent[d]||[];
  return `<div class="card"><b>${d}</b>${a.concat(e).map(x=>`<div class="it"><div><div class="n">${lk(x[1])}</div><div class="d">${lk(x[2])}</div></div><div class="pr"><small>${x[0].replace('–',' – ')}</small>${bellBtn(x,d)}</div></div>`).join('')}<a class="btn alt" href="#/activities">Full week</a></div>`}
 const VPOS={iru:'50% 100%'};
@@ -939,7 +939,7 @@ try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_pus
 setTimeout(alResync,3000);setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();if(typeof m.id=='string'&&/^a[a-z0-9]{3,30}$/.test(m.id))evTap(m.id);location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v23';
+window.APP_V='v24';
 setTimeout(cntFetch,500);setInterval(()=>{if(!document.hidden)cntFetch()},300000);
 try{const lo=+localStorage.getItem('vf_open')||0;if(Date.now()-lo>30*60000){ev('open');localStorage.setItem('vf_open',String(Date.now()))}if(standalone&&!localStorage.getItem('vf_inst')){ev('inst');localStorage.setItem('vf_inst','1')}}catch(e){}
 addEventListener('pagehide',()=>evFlush(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)evFlush(true);else cntFetch()});
