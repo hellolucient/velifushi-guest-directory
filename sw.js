@@ -1,4 +1,4 @@
-const C='velifushi-v16';
+const C='velifushi-v17';
 const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png','favicon-32.png','favicon.ico','img/aerial.jpg','img/logo.png','img/map.webp','img/spax-logo.webp','img/spax-scallop.webp','fonts/CormorantGaramond-normal.woff2','fonts/CormorantGaramond-italic.woff2','fonts/Montserrat-var.woff2','fonts/Jost-var.woff2','fonts/KaushanScript.woff2','fonts/Fredoka-var.woff2','img/th-cin-white.webp','img/th-cin-purple.webp'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CORE.concat(['ic-island','ic-menus','ic-sustain','ic-comp','ic-act','ic-map','ic-sig','ic-flower'].map(n=>'img/'+n+'.png')))));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!=C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
