@@ -974,7 +974,7 @@ try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_pus
 setTimeout(alResync,3000);setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();if(typeof m.id=='string'&&/^a[a-z0-9]{3,30}$/.test(m.id))evTap(m.id);location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v26';
+window.APP_V='v27';
 setTimeout(cntFetch,500);setInterval(()=>{if(!document.hidden)cntFetch()},300000);
 try{const lo=+localStorage.getItem('vf_open')||0;if(Date.now()-lo>30*60000){ev('open');localStorage.setItem('vf_open',String(Date.now()))}if(standalone&&!localStorage.getItem('vf_inst')){ev('inst');localStorage.setItem('vf_inst','1')}}catch(e){}
 addEventListener('pagehide',()=>evFlush(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)evFlush(true);else cntFetch()});
