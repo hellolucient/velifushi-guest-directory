@@ -523,6 +523,10 @@ body.th-wine nav.bar{background:#f5f1e8;border-top-color:#ddd5c6}body.th-wine na
 .wn .wn-pr{flex-direction:column;align-items:flex-start;justify-content:center;gap:6px}
 .wn .wn-pr:after{content:"+";font:300 20px/1 Jost,system-ui,sans-serif;color:#8b3a4f;margin-left:2px}.wn .wn-btn[aria-expanded=true] .wn-pr:after{content:"\2212"}
 
+
+.cvb{border-left:4px solid var(--t)}.cvb .nk{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:3px}.cvb>b{font-size:17px;display:block}.cvb .cvi{margin:5px 0 2px;font-size:14.5px;color:var(--ink)}.cvb h3{margin:14px 0 2px}.cvb .cvs{margin-top:0}.cvb .cvn{font-size:13px;margin-top:10px}
+.cvimg{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin:0 0 10px;background:#eef2f7}.card.nt .cvimg{margin-bottom:8px}
+.spax .cvb{margin:14px 16px 4px;background:#fff;border:1px solid var(--sxk,#e3d3b8);border-left:4px solid var(--sxk,#b98a4a);border-radius:14px;box-shadow:none}
 </style></head><body>
 <header class="top" id="hd"></header>
 <main id="app"></main>
@@ -578,7 +582,7 @@ async function annSeen(){try{if(!('serviceWorker' in navigator))return;const reg
 function ymd(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Indian/Maldives',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function ntList(){const m=mv(),day=m.day,L=(D.act[day]||[]).concat(D.ent[day]||[]),out=[],y=ymd();
  if(L.length){const top=L.slice(0,4).map(x=>x[0].replace('–',' – ')+' · '+x[1]);out.push({id:'day-'+y,t:'Today at Velifushi · '+day,b:top,more:Math.max(0,L.length-4),go:'#/activities',k:'Today’s schedule'})}
- return annLive().map(a=>({id:'ann-'+a.id,t:a.title,b:[a.body],go:a.link||'',k:'Announcement · '+annWhen(a.created)})).concat(out)}
+ return annLive().map(a=>({id:'ann-'+a.id,t:a.title,b:[a.body],go:a.link||'',img:a.image||'',k:'Announcement · '+annWhen(a.created)})).concat(out)}
 function ntRead(){try{return JSON.parse(localStorage.getItem('vf_read')||'[]')}catch(e){return[]}}
 function ntUnread(){const r=ntRead();return ntList().filter(n=>r.indexOf(n.id)<0)}
 function ntMark(){const had=annUnread()>0;try{const ids=ntList().map(n=>n.id),keep=ntRead().filter(x=>/^ann-/.test(x)).concat(ids);localStorage.setItem('vf_read',JSON.stringify(keep.filter((x,i)=>keep.indexOf(x)==i)))}catch(e){}if(had)annSeen()}
@@ -587,7 +591,7 @@ function ntBadge(force){const n=ntUnread().length,an=annUnread();
  if(!annOk&&!force)return;try{if(an){if(navigator.setAppBadge)navigator.setAppBadge(an).catch(()=>{})}else if(navigator.clearAppBadge)navigator.clearAppBadge().catch(()=>{})}catch(e){}}
 V.notifications=()=>{const un=ntUnread().map(n=>n.id),L=ntList();setTimeout(()=>{ntMark();ntBadge(true);annFetch()},0);
  const perm=('Notification' in window)?Notification.permission:'unsupported';
- return `<h2>Notifications</h2><p class="actnote">Today’s schedule and the latest news from the resort.</p>`+(L.length?L.map(n=>`<div class="card nt${un.indexOf(n.id)>=0?' new':''}"><div class="nk">${esc(n.k)}${un.indexOf(n.id)>=0?' <span class="tdtag">New</span>':''}</div><b>${esc(n.t)}</b>${n.b.map(x=>`<div class="d" style="font-size:14px;margin-top:3px">${esc(x)}</div>`).join('')}${n.more?`<div class="d" style="font-size:13px;color:var(--mu);margin-top:3px">+ ${n.more} more</div>`:''}${n.go?`<a class="btn alt" href="${esc(n.go)}">${n.go=='#/activities'?'Full week':'Open'}</a>`:''}</div>`).join(''):'<div class="card"><b>You’re all caught up</b><div class="d" style="font-size:14px">Nothing new right now.</div></div>')+`<div class="card"><b>Phone alerts</b><div class="d" style="font-size:14px;margin:3px 0 6px">${pushState(perm)[0]}</div>${pushState(perm)[1]}</div>`};
+ return `<h2>Notifications</h2><p class="actnote">Today’s schedule and the latest news from the resort.</p>`+(L.length?L.map(n=>`<div class="card nt${un.indexOf(n.id)>=0?' new':''}">${n.img?`<img class="cvimg" loading="lazy" src="${PUSH_API}/media/${esc(n.img)}" alt="">`:''}<div class="nk">${esc(n.k)}${un.indexOf(n.id)>=0?' <span class="tdtag">New</span>':''}</div><b>${esc(n.t)}</b>${n.b.map(x=>`<div class="d" style="font-size:14px;margin-top:3px">${esc(x)}</div>`).join('')}${n.more?`<div class="d" style="font-size:13px;color:var(--mu);margin-top:3px">+ ${n.more} more</div>`:''}${n.go?`<a class="btn alt" href="${esc(n.go)}"${/^ann-/.test(n.id)?` onclick="evTap('${esc(n.id.slice(4))}')"`:''}>${n.go=='#/activities'?'Full week':'Open'}</a>`:''}</div>`).join(''):'<div class="card"><b>You’re all caught up</b><div class="d" style="font-size:14px">Nothing new right now.</div></div>')+`<div class="card"><b>Phone alerts</b><div class="d" style="font-size:14px;margin:3px 0 6px">${pushState(perm)[0]}</div>${pushState(perm)[1]}</div>`};
 function pushOn(){try{return localStorage.getItem('vf_push')=='1'&&localStorage.getItem('vf_push_off')!='1'}catch(e){return false}}
 function pushState(perm){const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
  if(perm=='denied')return['Alerts are blocked – enable them in your phone’s settings for this app.',''];
@@ -775,15 +779,36 @@ function kdFav(){const n=document.querySelectorAll('.kd-heart[aria-pressed=true]
 addEventListener('scroll',()=>{const b=document.querySelector('.wn-bar');if(b)b.classList.toggle('stuck',scrollY>12&&b.getBoundingClientRect().top<=1)},{passive:true});
 
 // ---- router
+// ---- v19: staff-published page updates, announcement images and anonymous counting
+let CNT=null;try{CNT=JSON.parse(localStorage.getItem('vf_content')||'null')}catch(e){}
+const CNTP=['spa','dining','menus','activities','excursions','dive','special','wedding','laundry','info','packages','contacts'];
+function cntFor(r){const n=Date.now();return(Array.isArray(CNT)?CNT:[]).filter(b=>b&&b.id&&b.page===r&&b.title&&(!b.expires||b.expires>n))}
+function cntBlock(b){const dt=(()=>{try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Indian/Maldives',day:'numeric',month:'short'}).format(new Date(b.created))}catch(e){return''}})();
+ return `<div class="card cvb">${b.image?`<img class="cvimg" loading="lazy" src="${PUSH_API}/media/${esc(b.image)}" alt="">`:''}<div class="nk">Resort update${dt?' · '+dt:''}</div><b>${esc(b.title)}</b>${b.intro?`<p class="cvi">${esc(b.intro)}</p>`:''}${(b.sections||[]).map(s=>`${s.heading?`<h3>${esc(s.heading)}</h3>`:''}<div class="cvs">${(s.items||[]).map(i=>`<div class="it"><div><div class="n">${esc(i.name)}</div>${i.description?`<div class="d">${esc(i.description)}</div>`:''}</div>${i.price?`<div class="pr">${esc(i.price)}</div>`:''}</div>`).join('')}</div>`).join('')}${b.note?`<div class="d cvn">${esc(b.note)}</div>`:''}</div>`}
+function cntInject(html,r){const L=cntFor(r);if(!L.length)return html;const h=L.map(cntBlock).join('');
+ const m='<div class="sx-in">';let i=html.indexOf(m);if(i>=0)return html.slice(0,i+m.length)+h+html.slice(i+m.length);
+ i=html.indexOf('</h2>');if(i>=0)return html.slice(0,i+5)+h+html.slice(i+5);return h+html}
+async function cntFetch(){try{const c=new AbortController(),tm=setTimeout(()=>c.abort(),8000);const r=await fetch(PUSH_API+'/content',{cache:'no-store',signal:c.signal});clearTimeout(tm);if(!r.ok)return;const j=await r.json();if(!j||!Array.isArray(j.blocks))return;
+ const rt=location.hash.replace(/^#\/?/,'').split('/')[0],sig=()=>JSON.stringify(cntFor(rt));const was=sig();CNT=j.blocks;try{localStorage.setItem('vf_content',JSON.stringify(CNT))}catch(e){}
+ if(sig()!==was&&document.activeElement.tagName!='INPUT'){const y=scrollY;render();scrollTo(0,y)}}catch(e){}}
+// anonymous counting: a random id this device makes for itself, page names and counts only (no name, phone, IP or location is sent)
+const EVQ=[];let evT=0,_lp='';
+function evId(){let d='';try{d=localStorage.getItem('vf_did')||''}catch(e){}if(!/^[a-f0-9]{32}$/.test(d)){d=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join('');try{localStorage.setItem('vf_did',d)}catch(e){}}return d}
+function evFlush(beacon){if(!EVQ.length)return;const body=JSON.stringify({d:evId(),e:EVQ.splice(0,25)});try{if(beacon&&navigator.sendBeacon)navigator.sendBeacon(PUSH_API+'/e',new Blob([body],{type:'text/plain'}));else fetch(PUSH_API+'/e',{method:'POST',body,headers:{'Content-Type':'text/plain'},keepalive:true}).catch(()=>{})}catch(e){}}
+function ev(k,x){try{EVQ.push(x==null?[k]:[k,x]);clearTimeout(evT);evT=setTimeout(()=>evFlush(),1500)}catch(e){}}
+function evPage(r){r=r||'home';if(r===_lp)return;_lp=r;ev('page',r)}
+function evTap(id){ev('at',id)}
+function evViews(){try{const seen=JSON.parse(localStorage.getItem('vf_av')||'[]'),nw=annLive().map(a=>a.id).filter(i=>seen.indexOf(i)<0);if(nw.length){nw.forEach(i=>ev('av',i));localStorage.setItem('vf_av',JSON.stringify(seen.concat(nw).slice(-200)))}}catch(e){}}
 function render(){const h=location.hash.replace(/^#\/?/,'');const [r,a,b]=h.split('/').map(decodeURIComponent);let html;
  if(r=='search'||r=='find'){const q=a||'';history.replaceState(null,'','#/');setTimeout(()=>{if(window.Milo){Milo.openChat();if(q)Milo.ask(q)}},120);return render()}
  
  if(r=='menu')html=V.menu(a,null,b);else if(r=='venue')html=V.venue(a);else if(r=='map')html=V.map(a);else html=(V[r]||V.home)();
+ if(CNTP.indexOf(r)>=0)html=cntInject(html,r);
  app.innerHTML=html;const home=!r;document.body.classList.toggle('home',home);document.body.classList.toggle('spa-on',r=='spa');{const tn=thName(r,a),bc=document.body.classList;[...bc].forEach(c=>{if(/^th-/.test(c))bc.remove(c)});if(tn){bc.add('th-on','th-'+tn)}if(r=='laundry')lnUpd(3)}if(home&&window.__inst)$('#pInstall')&&($('#pInstall').style.display='none');
  $('#hd').innerHTML=`<div class="row">${home?'':`<button class="back pill" onclick="location.hash='#/'" aria-label="Back to the dial">${IC.dial}Dial</button>`}<div><h1>Cinnamon Velifushi</h1><div class="sub">Guest Directory · Vaavu Atoll, Maldives</div></div></div>${home?'':`<div class="mband"><div class="clock" style="margin-top:0">🕒 ${mv().txt} (Maldives time)</div></div>`}`;
  $('#nav').innerHTML=[['','◉','Dial'],['dining','🍽️','Dine'],['spa','💆','Spa'],['activities','🎯','Do'],['contacts','📞','Call']].map(n=>`<a href="#/${n[0]}" class="${(r||'')==n[0]?'on':''}"><span>${n[1]}</span>${n[2]}</a>`).join('');
  if(r=='map'&&a){const p=document.querySelector('.pin.hl'),ms=$('#ms');if(p&&ms)ms.scrollLeft=p.offsetLeft-ms.clientWidth/2}
- if(!(r=='menu'&&document.activeElement.id=='mq'))scrollTo(0,0);if(window.__mattach)window.__mattach();ntBadge()}
+ if(!(r=='menu'&&document.activeElement.id=='mq'))scrollTo(0,0);if(window.__mattach)window.__mattach();ntBadge();evPage(r);if(r=='notifications')evViews()}
 addEventListener('hashchange',()=>{window.__mq='';render()});
 render();setInterval(()=>{const sb=document.getElementById('spaBadge');if(sb){sb.innerHTML=badge(D.facilities[0].hours)}else if(!/menu|laundry|notifications/.test(location.hash)&&document.activeElement.tagName!='INPUT'){const y=scrollY;render();scrollTo(0,y)}ntBadge()},60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)ntBadge()});
 
@@ -832,9 +857,12 @@ async function askNotify(){
 // keep an existing alert subscription registered; fetch announcements; react to the service worker
 try{if(PUSH_OK&&Notification.permission=='granted'&&localStorage.getItem('vf_push_off')!='1')setTimeout(()=>pushEnable().catch(()=>{}),2500)}catch(e){}
 setTimeout(annFetch,300);setInterval(()=>{if(!document.hidden)annFetch()},300000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)annFetch()});
-if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();location.hash=m.hash}});
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data||{};if(m.type=='ann')annFetch();if(m.type=='go'&&typeof m.hash=='string'&&/^#\/[\w\/.-]*$/.test(m.hash)){annFetch();if(typeof m.id=='string'&&/^a[a-z0-9]{3,30}$/.test(m.id))evTap(m.id);location.hash=m.hash}});
 try{if(!standalone&&!localStorage.getItem('vf_install_seen')&&!localStorage.getItem('vf_install_never'))setTimeout(()=>{if(!$('#sheet').classList.contains('on')){openSheet();localStorage.setItem('vf_install_seen','1')}},1500)}catch(e){}
-window.APP_V='v18';
+window.APP_V='v19';
+setTimeout(cntFetch,500);setInterval(()=>{if(!document.hidden)cntFetch()},300000);
+try{const lo=+localStorage.getItem('vf_open')||0;if(Date.now()-lo>30*60000){ev('open');localStorage.setItem('vf_open',String(Date.now()))}if(standalone&&!localStorage.getItem('vf_inst')){ev('inst');localStorage.setItem('vf_inst','1')}}catch(e){}
+addEventListener('pagehide',()=>evFlush(true));document.addEventListener('visibilitychange',()=>{if(document.hidden)evFlush(true);else cntFetch()});
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||rl)return;rl=true;try{toast('Updating to the latest guide…')}catch(e){}setTimeout(()=>location.reload(),900)});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const chk=()=>r.update().catch(()=>{});chk();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,1800000)}).catch(()=>{})}
 </script><a id="stf" href="https://milo.cinnamonvelifushi.workers.dev/admin" aria-label="Staff" title="Staff" style="position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:40;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,248,236,.55);color:rgba(120,70,30,.55);font:600 15px/1 system-ui;text-decoration:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)">&#8943;</a>
 <script>// ---- Milo, the guide mascot (client-side only: no AI, no backend)
